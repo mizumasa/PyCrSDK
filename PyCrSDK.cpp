@@ -150,6 +150,12 @@ int PyCrSDK::get_iso(int no)
     return 100;
 }
 
+void PyCrSDK::get_live_view(int no, py::buffer py_buf)
+{
+    CameraDevicePtr camera = nullptr;
+    if(!findTarget(no,camera))return;
+    camera->get_live_view(0, py_buf); // 0 for LiveViewOnly
+}
 
 // ----------------------------------------------------------------
 

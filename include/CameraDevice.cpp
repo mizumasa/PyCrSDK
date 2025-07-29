@@ -467,9 +467,8 @@ void CameraDevice::get_focus_area()
     tout << "Focus Area: " << format_focus_area(m_prop.focus_area.current) << '\n';
 }
 
-void CameraDevice::get_live_view_only()
+void CameraDevice::get_live_view_only(py::buffer py_buf)
 {
-    tout << "GetLiveView...\n";
 
     CrInt32 num = 0;
     SDK::CrLiveViewProperty* property = nullptr;
@@ -564,23 +563,21 @@ void CameraDevice::get_live_view_only()
     auto path = fs::current_path();
     path.append(TEXT("LiveView000000.JPG"));
 #endif
-    tout << path << '\n';
 
-    std::ofstream file(path, std::ios::out | std::ios::binary);
-    if (!file.bad())
-    {
-        file.write((char*)image_data->GetImageData(), image_data->GetImageSize());
-        file.close();
+    py::buffer_info info = py_buf.request();
+    if (info.size < bufSize) {
+        throw std::runtime_error("Buffer is too small for image data");
     }
-    tout << "GetLiveView SUCCESS\n";
+
+    // Python側バッファにコピー
+    std::memcpy(info.ptr, (char*)image_data->GetImageData(), image_data->GetImageSize());
+
     delete[] image_buff; // Release
     delete image_data; // Release
 }
 
-void CameraDevice::get_live_view_and_OSD()
+void CameraDevice::get_live_view_and_OSD(py::buffer py_buf)
 {
-    tout << "GetLiveView...\n";
-
     CrInt32u isLVEnb = 0;
     SDK::GetDeviceSetting(m_device_handle, SDK::Setting_Key_EnableLiveView, &isLVEnb);
 
@@ -843,15 +840,16 @@ void CameraDevice::get_live_view_and_OSD()
     auto path = fs::current_path();
     path.append(TEXT("LiveView000000.JPG"));
 #endif
-    tout << path << '\n';
 
-    std::ofstream file(path, std::ios::out | std::ios::binary);
-    if (!file.bad())
-    {
-        file.write((char*)image_buff, image_size);
-        file.close();
+    py::buffer_info info = py_buf.request();
+    if (info.size < image_size) {
+        throw std::runtime_error("Buffer is too small for image data");
     }
-    tout << "GetLiveView SUCCESS\n";
+
+    // Python側バッファにコピー
+    std::memcpy(info.ptr, (char*)image_buff, image_size);
+
+    
     if (liveview_image_buff) {
         delete[] liveview_image_buff; // Release
         liveview_image_buff = nullptr;
@@ -865,7 +863,7 @@ void CameraDevice::get_live_view_and_OSD()
     delete[] image_buff; // Release
 }
 
-void CameraDevice::get_live_view()
+void CameraDevice::get_live_view(int selected_index, py::buffer py_buf)
 {
     // check OSD gettable status
     std::int32_t nprop = 0;
@@ -882,38 +880,20 @@ void CameraDevice::get_live_view()
     }
 
     if (false == bSelected) {
-        get_live_view_only();
+        get_live_view_only(py_buf);
         return;
     }
 
     enum { LiveViewOnly, LiveViewAndOSD };
 
-    text input;
-    tout << "Choose a number the type of image you want to get:\n";
-    tout << "[-1] Cancel input\n";
-    tout << "[" << LiveViewOnly << "] LiveView only\n";
-    tout << "[" << LiveViewAndOSD << "] Image of LiveView and OSD overlay\n";
-    tout << "[-1] Cancel input\n";
-    tout << "Choose a number the type of image you want to get:\n";
-
-    tout << "input> ";
-    std::getline(tin, input);
-    text_stringstream ss(input);
-    int selected_index = 0;
-    ss >> selected_index;
-
     if (LiveViewOnly == selected_index) {
-        get_live_view_only();
-    }
-    else if (LiveViewAndOSD == selected_index) {
-        get_live_view_and_OSD();
-    }
-    else {
-        tout << "Input cancelled.\n";
+        get_live_view_only(py_buf);
         return;
     }
-
-
+    else if (LiveViewAndOSD == selected_index) {
+        get_live_view_and_OSD(py_buf);
+        return;
+    }
 }
 
 void CameraDevice::get_osd_image()

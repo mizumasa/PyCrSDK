@@ -16,7 +16,8 @@ PYBIND11_MODULE(pycrsdk, m) {
         .def("connect_camera", &PyCrSDK::connect_camera)
         .def("disconnect_camera", &PyCrSDK::disconnect_camera)
         .def("capture_image", &PyCrSDK::capture_image)
-        .def("get_iso", &PyCrSDK::get_iso)
+        .def("get_iso", &PyCrSDK::get_iso, py::arg("no"))
+        .def("get_live_view", &PyCrSDK::get_live_view, py::arg("no"), py::arg("py_buf"))
         .def("get_connected_model", &PyCrSDK::get_connected_model)
     ;
 }

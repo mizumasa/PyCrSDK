@@ -24,6 +24,13 @@ typedef int errno_t;
 #include "Text.h"
 #include "MessageDefine.h"
 
+#include <pybind11/pybind11.h>
+#include <pybind11/numpy.h>
+#include <pybind11/stl.h>
+#include <vector>
+#include <cstdint>
+namespace py = pybind11;
+
 namespace cli
 {
 
@@ -88,9 +95,9 @@ public:
     void get_still_capture_mode();
     void get_focus_mode();
     void get_focus_area();
-    void get_live_view();
-    void get_live_view_only();
-    void get_live_view_and_OSD();
+    void get_live_view(int mode, py::buffer py_buf);
+    void get_live_view_only(py::buffer py_buf);
+    void get_live_view_and_OSD(py::buffer py_buf);
     void get_live_view_image_quality();
     void get_af_area_position();
     void get_select_media_format();

@@ -1,3 +1,6 @@
+import io
+import cv2
+import numpy as np
 import sys
 sys.path.append("C:/masaru/CrSDK/PyCrSDK/build/Release")
 
@@ -24,6 +27,34 @@ else:
         print("getting ISO value...")
         iso_value = cam.get_iso(0)
         print("ISO value:", iso_value)
+
+
+        img_size = 1024*1024  # 例: 最大1MBと想定
+
+        # Pythonでバッファを用意
+        buf = bytearray(img_size)
+
+        # C++関数を呼び出し、データを直接書き込む
+        while 1:
+            try:
+                cam.get_live_view(0, buf)
+                arr = np.frombuffer(buf, dtype=np.uint8)
+                img = cv2.imdecode(arr, cv2.IMREAD_COLOR)  # BGR画像としてデコード
+                cv2.imshow("LiveView", img)
+                key = cv2.waitKey(1)
+                if key == 27:  # ESCキーで終了
+                    break
+            except Exception as e:
+                print("Error during live view:", e)
+                break
+        
+        # バッファ内容をImageに渡す場合
+        if 0:
+            from PIL import Image
+            img = Image.open(io.BytesIO(buf))
+            img = img.convert("RGB")
+            img.show()
+
 
         success = cam.capture_image(0)
         print("Capture result:", success)

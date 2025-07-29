@@ -4,7 +4,6 @@
 #include "CRSDK/CameraRemote_SDK.h"
 #include "CRSDK/CameraRemote_SDK.h"
 #include "CameraDevice.h"
-#include "CameraDevice.h"
 #include "Text.h"
 
 class PyCrSDK
@@ -24,6 +23,7 @@ public:
 
     bool capture_image(int no);
     int get_iso(int no);
+    void get_live_view(int no, py::buffer py_buf);
 
     std::string get_connected_model() const;
     // --------------------------------
