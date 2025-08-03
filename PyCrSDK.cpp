@@ -23,7 +23,7 @@ bool PyCrSDK::sdk_init()
 void PyCrSDK::sdk_release()
 {
     if (!m_sdk_inited) return;
-    disconnect_camera();
+    //disconnect_camera();
     SDK::Release();
     m_sdk_inited = false;
 }
@@ -94,12 +94,15 @@ bool PyCrSDK::connect_camera(int no)
 
     std::int32_t cameraNumUniq = no;
 
-    cli::tout << "Connect to selected camera...\n";
-    auto* camera_info = camera_list->GetCameraObjectInfo(no);
+    CameraDevicePtr camera = nullptr;
+    if (!findTarget(no, camera, false)) {
+        cli::tout << "Connect to selected camera...\n";
+        auto* camera_info = camera_list->GetCameraObjectInfo(no);
 
-    cli::tout << "Create camera SDK camera callback object.\n";
-    CameraDevicePtr camera = CameraDevicePtr(new cli::CameraDevice(cameraNumUniq, camera_info));
-    cameraList.push_back(camera); // add 1st
+        cli::tout << "Create camera SDK camera callback object.\n";
+        camera = CameraDevicePtr(new cli::CameraDevice(cameraNumUniq, camera_info));
+        cameraList.push_back(camera); // add 1st
+    }
 
     if (camera->is_connected()) {
         cli::tout << "Please disconnect\n";
@@ -113,22 +116,19 @@ bool PyCrSDK::connect_camera(int no)
         cli::tout << "Connected to: " << camera->get_model() << "\n";
     }
 
-    cli::tout << "Release enumerated camera list.\n";
-    camera_list->Release();
+    //cli::tout << "Release enumerated camera list.\n";
+    //camera_list->Release();
     return true;
 }
 
-void PyCrSDK::disconnect_camera()
+bool PyCrSDK::disconnect_camera(int no)
 {
-    /*
-    if (!m_connected) return;
-    SDK::Disconnect(m_deviceHandle);
-    SDK::ReleaseDevice(m_deviceHandle);
-    m_deviceHandle   = 0;
-    m_connected      = false;
-    m_current_info   = nullptr;
-    m_current_model.clear();
-    */
+    CameraDevicePtr camera = nullptr;
+    if(!findTarget(no,camera,true))return false;
+    if (camera->is_connected()) {
+        camera->disconnect();
+    }
+    return true;
 }
 // ----------------------------------------------------------------
 
@@ -136,7 +136,7 @@ void PyCrSDK::disconnect_camera()
 bool PyCrSDK::capture_image(int no)
 {
     CameraDevicePtr camera = nullptr;
-    if(!findTarget(no,camera))return false;
+    if(!findTarget(no,camera,true))return false;
     camera->af_shutter();
     return true;
 }
@@ -145,16 +145,17 @@ bool PyCrSDK::capture_image(int no)
 int PyCrSDK::get_iso(int no)
 {
     CameraDevicePtr camera = nullptr;
-    if(!findTarget(no,camera))return -1;
+    if(!findTarget(no,camera,true))return -1;
     camera->get_iso();
     return 100;
 }
 
-void PyCrSDK::get_live_view(int no, py::buffer py_buf)
+bool PyCrSDK::get_live_view(int no, py::buffer py_buf)
 {
     CameraDevicePtr camera = nullptr;
-    if(!findTarget(no,camera))return;
+    if(!findTarget(no,camera,true))return false;
     camera->get_live_view(0, py_buf); // 0 for LiveViewOnly
+    return true;
 }
 
 // ----------------------------------------------------------------
@@ -165,7 +166,7 @@ std::string PyCrSDK::get_connected_model() const
 }
 // ----------------------------------------------------------------
 
-bool PyCrSDK::findTarget(int no, CameraDevicePtr& camera)
+bool PyCrSDK::findTarget(int no, CameraDevicePtr& camera, bool check_connected)
 {
     bool findTarget = false;
     CameraDeviceList::const_iterator it = cameraList.begin();
@@ -178,6 +179,10 @@ bool PyCrSDK::findTarget(int no, CameraDevicePtr& camera)
     }
     if (!findTarget) {
         cli::tout << "The specified camera cannot be found!\n";
+        return false;
+    }
+    if(check_connected && !camera->is_connected()) {
+        cli::tout << "The specified camera is not connected!\n";
         return false;
     }
     return true;

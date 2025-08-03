@@ -56,8 +56,8 @@ else:
             img.show()
 
 
-        success = cam.capture_image(0)
-        print("Capture result:", success)
+        #success = cam.capture_image(0)
+        #print("Capture result:", success)
 
         # 5) 切断
         cam.disconnect_camera()

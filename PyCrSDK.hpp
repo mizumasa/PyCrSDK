@@ -19,11 +19,11 @@ public:
     int enumerate_cameras();
 
     bool connect_camera(int no);
-    void disconnect_camera();
+    bool disconnect_camera(int no);
 
     bool capture_image(int no);
     int get_iso(int no);
-    void get_live_view(int no, py::buffer py_buf);
+    bool get_live_view(int no, py::buffer py_buf);
 
     std::string get_connected_model() const;
     // --------------------------------
@@ -48,5 +48,5 @@ private:
     typedef std::shared_ptr<cli::CameraDevice> CameraDevicePtr;
     typedef std::vector<CameraDevicePtr> CameraDeviceList;
     CameraDeviceList cameraList;
-    bool findTarget(int no, CameraDevicePtr& camera);
+    bool findTarget(int no, CameraDevicePtr& camera, bool check_connected);
 };
