@@ -29,6 +29,14 @@ typedef int errno_t;
 #include <pybind11/stl.h>
 #include <vector>
 #include <cstdint>
+
+// 追加：取得種別を表す列挙体
+enum class RemoteTransferDataKind {
+    Contents,   // フルサイズ
+    Thumbnail,  // サムネイル
+    Screennail  // スクリーンネイル
+};
+
 namespace py = pybind11;
 
 namespace cli
@@ -255,6 +263,9 @@ public:
 
     // RemoteTransfer Mode
     void get_remote_transfer_contentsdata();
+    bool download_latest_files(SCRSDK::CrSlotNumber slotNumber,
+                                         std::size_t         numFiles,
+                                         RemoteTransferDataKind kind);
     void show_contents_data_detail(SCRSDK::CrContentsInfo& contentsInfo, SCRSDK::CrContentsFile& contentsFile);
     void release_contents_info(int slotIndex);
     void execute_movie_rec_and_get_contentsdata();

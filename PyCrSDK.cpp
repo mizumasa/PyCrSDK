@@ -81,7 +81,7 @@ int PyCrSDK::enumerate_cameras()
 // ----------------------------------------------------------------
 
 // ==== connect / disconnect ======================================
-bool PyCrSDK::connect_camera(int no)
+bool PyCrSDK::connect_camera(int no, int mode)
 {
     if (!camera_list){
         std::cerr << "[PyCrSDK] No camera list available. Please enumerate cameras first.\n";
@@ -108,7 +108,13 @@ bool PyCrSDK::connect_camera(int no)
         cli::tout << "Please disconnect\n";
     }
     else {
-        auto success = camera->connect(SDK::CrSdkControlMode_Remote, SDK::CrReconnecting_ON);
+        if (mode < 0 || mode > 2) {
+            cli::tout << "Invalid mode. Use 0=Remote, 1=ContentsTransfer, 2=RemoteTransfer.\n";
+            return false;
+        }
+        SDK::CrSdkControlMode openMode = static_cast<SDK::CrSdkControlMode>(mode);
+        SDK::CrReconnectingSet reconnect = SDK::CrReconnecting_ON;  
+        auto success = camera->connect(openMode, reconnect);
         if (!success) {
             cli::tout << "Failed to connect to camera.\n";
             return false;
@@ -156,6 +162,20 @@ bool PyCrSDK::get_live_view(int no, py::buffer py_buf)
     if(!findTarget(no,camera,true))return false;
     camera->get_live_view(0, py_buf); // 0 for LiveViewOnly
     return true;
+}
+
+bool PyCrSDK::download_latest_files(int no, int slot, int file_num, int mode)
+{
+    CameraDevicePtr camera = nullptr;
+    if(!findTarget(no,camera,true))return false;
+    SDK::CrSlotNumber slotNumber =
+        (slot == 0) ? SDK::CrSlotNumber_Slot1
+                    : SDK::CrSlotNumber_Slot2;
+    RemoteTransferDataKind kind =
+        (mode == 0) ? RemoteTransferDataKind::Contents
+                    : (mode == 1) ? RemoteTransferDataKind::Thumbnail
+                                  : RemoteTransferDataKind::Screennail;
+    return camera->download_latest_files(slotNumber, file_num, kind);
 }
 
 // ----------------------------------------------------------------

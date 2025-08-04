@@ -18,6 +18,8 @@ PYBIND11_MODULE(pycrsdk, m) {
         .def("capture_image", &PyCrSDK::capture_image)
         .def("get_iso", &PyCrSDK::get_iso, py::arg("no"))
         .def("get_live_view", &PyCrSDK::get_live_view, py::arg("no"), py::arg("py_buf"))
+        .def("download_latest_files", &PyCrSDK::download_latest_files,
+              py::arg("no"), py::arg("slot"), py::arg("file_num"), py::arg("mode"))
         .def("get_connected_model", &PyCrSDK::get_connected_model)
     ;
 }

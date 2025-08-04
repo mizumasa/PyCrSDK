@@ -18,13 +18,13 @@ public:
 
     int enumerate_cameras();
 
-    bool connect_camera(int no);
+    bool connect_camera(int no, int mode = 0); // mode: 0=Remote, 1=ContentsTransfer, 2=RemoteTransfer
     bool disconnect_camera(int no);
 
     bool capture_image(int no);
     int get_iso(int no);
     bool get_live_view(int no, py::buffer py_buf);
-
+    bool download_latest_files(int no, int slot, int file_num, int mode);
     std::string get_connected_model() const;
     // --------------------------------
 
