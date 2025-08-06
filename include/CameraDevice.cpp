@@ -8055,19 +8055,26 @@ void CameraDevice::get_remote_transfer_contentsdata()
     return;
 }
 
+// Optimized implementation of CameraDevice::download_latest_files
+// Algorithm:
+//   1. Get list of capture-date folders and sort them newest → oldest.
+//   2. For each folder (starting with the most recent) fetch that single day’s
+//      contents list, sort the contents newest → oldest, and download files on
+//      the fly until the requested count is reached.
+//   3. Stop immediately when we have numFiles files – we never allocate or
+//      sort a full‑archive vector.
+//   4. Error handling & progress‑report logic are unchanged.
+
 bool CameraDevice::download_latest_files(SDK::CrSlotNumber slotNumber,
                                          std::size_t         numFiles,
                                          RemoteTransferDataKind kind)
 {
     //----------------------------------------------------------------------
-    // 1. スロット決定
+    // 1. Slot selection & date‑list acquisition
     //----------------------------------------------------------------------
     const int slotIndex = (slotNumber == SDK::CrSlotNumber_Slot2) ? 1 : 0;
     release_contents_info(slotIndex);
 
-    //----------------------------------------------------------------------
-    // 2. そのスロットの日付一覧を取得
-    //----------------------------------------------------------------------
     SDK::CrError ret;
     CrInt32u dateCount = 0;
     ret = SDK::GetRemoteTransferCapturedDateList(
@@ -8079,74 +8086,17 @@ bool CameraDevice::download_latest_files(SDK::CrSlotNumber slotNumber,
     }
 
     //----------------------------------------------------------------------
-    // 3. 各日付から ContentsInfo を集め、日時順にソート
+    // 2. Sort the date list – newest first
     //----------------------------------------------------------------------
-    struct Entry {
-        SDK::CrContentsInfo* info;
-        SDK::CrContentsFile* file;
-    };
-    std::vector<Entry> allFiles;
+    std::vector<SDK::CrCaptureDate> dates(&m_captureDateList[slotIndex][0],
+                                           &m_captureDateList[slotIndex][0] + dateCount);
+    std::sort(dates.begin(), dates.end(), [](const auto& a, const auto& b) {
+        if (a.year  != b.year)  return a.year  > b.year;
+        if (a.month != b.month) return a.month > b.month;
+        return a.day > b.day;
+    });
 
-    for (CrInt32u d = 0; d < dateCount; ++d) {
-        CrInt32u infoNums = 0;
-
-        ret = SDK::GetRemoteTransferContentsInfoList(
-            m_device_handle, slotNumber,
-            SDK::CrGetContentsInfoListType_Range_Day,
-            &m_captureDateList[slotIndex][d],   // ←この日付１日分
-            0,                                  // rangeNum = 0 なら１日分だけ
-            &m_contentsInfoList[slotIndex], &infoNums);
-
-        if (ret != SDK::CrError_None) {
-            tout << u8"ContentsInfoList 取得失敗 (day index=" << d << ")\n";
-            continue;
-        }
-
-        for (CrInt32u i = 0; i < infoNums; ++i) {
-            char buff[512];
-            CrInt32u count = 0;
-            for (CrInt32u j = 0; j < m_contentsInfoList[slotIndex][i].filesNum; j++) {
-                memset(buff, 0, sizeof(buff));
-                const std::string filePath = m_contentsInfoList[slotIndex][i].files[j].filePath;
-                std::string::size_type pos = 0;
-                const std::string delim = "/";
-                while (1) {
-                    auto nextPos = filePath.find(delim, pos);
-                    if (nextPos == std::string::npos) {
-                        break;
-                    }
-                    pos = nextPos + 1;
-                }
-                const std::string fileName = filePath.substr(pos);
-
-                snprintf(buff, sizeof(buff), "[%d] %04d/%02d/%02d %02d:%02d:%02d, FileId:%d, FileName:%s\n", count,
-                    m_contentsInfoList[slotIndex][i].creationDatetimeLocaltime.year,
-                    m_contentsInfoList[slotIndex][i].creationDatetimeLocaltime.month,
-                    m_contentsInfoList[slotIndex][i].creationDatetimeLocaltime.day,
-                    m_contentsInfoList[slotIndex][i].creationDatetimeLocaltime.hour,
-                    m_contentsInfoList[slotIndex][i].creationDatetimeLocaltime.minute,
-                    m_contentsInfoList[slotIndex][i].creationDatetimeLocaltime.sec,
-                    m_contentsInfoList[slotIndex][i].files[j].fileId, fileName.c_str());
-                tout << buff;
-                count++;
-            }
-        }
-
-
-        for (CrInt32u i = 0; i < infoNums; ++i) {
-            auto& ci = m_contentsInfoList[slotIndex][i];
-            for (CrInt32u j = 0; j < ci.filesNum; ++j) {
-                allFiles.push_back({ &ci, &ci.files[j] });
-            }
-        }
-    }
-
-    if (allFiles.empty()) {
-        tout << u8"対象ファイルがありません\n";
-        return false;
-    }
-
-    // ---- 日時降順にソート（最新が先頭） ----
+    // Helper: convert SDK date‑time to chrono::time_point for intra‑day sort
     auto to_time_point = [](const auto& dt) noexcept {
         std::tm tm{};
         tm.tm_year = dt.year  - 1900;
@@ -8158,86 +8108,113 @@ bool CameraDevice::download_latest_files(SDK::CrSlotNumber slotNumber,
         return std::chrono::system_clock::from_time_t(std::mktime(&tm));
     };
 
-    std::sort(allFiles.begin(), allFiles.end(),
-        [&](const Entry& a, const Entry& b) {
-            return to_time_point(a.info->creationDatetimeLocaltime) >
-                   to_time_point(b.info->creationDatetimeLocaltime);
-        });
-
-    //----------------------------------------------------------------------
-    // 4. 先頭 numFiles 件をダウンロード
-    //----------------------------------------------------------------------
-    const std::size_t maxFiles = std::min(numFiles, allFiles.size());
-    CrInt32u divisionSize = 0x5000000;          // 80 MB
+    //------------------------------------------------------------------
+    // 3. Iterate folders newest → oldest, downloading on the fly
+    //------------------------------------------------------------------
+    std::size_t downloaded = 0;
+    CrInt32u divisionSize = 0x5000000;       // 80 MB default
 #if defined(__linux__)
-    if (m_conn_type == ConnectionType::USB) {   // USB の場合は 16 MB
+    if (m_conn_type == ConnectionType::USB)  // USB → 16 MB
         divisionSize = 0x1000000;
-    }
 #endif
 
-    for (std::size_t idx = 0; idx < maxFiles; ++idx) {
-        const auto& entry = allFiles[idx];
-        const auto& ci    = *entry.info;
-        const auto& cf    = *entry.file;
+    for (auto& day : dates) {
+        if (downloaded >= numFiles) break;
 
-        m_getContentsDataStartFlg = true;
-        ret = SDK::CrError_None;
-
-        switch (kind) {
-        case RemoteTransferDataKind::Contents:
-            ret = SDK::GetRemoteTransferContentsDataFile(
-                    m_device_handle, slotNumber,
-                    ci.contentId, cf.fileId,
-                    divisionSize, nullptr, nullptr);
-            break;
-
-        case RemoteTransferDataKind::Thumbnail:
-            ret = SDK::GetRemoteTransferContentsCompressedDataFile(
-                    m_device_handle, slotNumber,
-                    ci.contentId, cf.fileId,
-                    SDK::CrGetContentsCompressedDataType_Thumbnail,
-                    nullptr, nullptr);
-            break;
-
-        case RemoteTransferDataKind::Screennail:
-            ret = SDK::GetRemoteTransferContentsCompressedDataFile(
-                    m_device_handle, slotNumber,
-                    ci.contentId, cf.fileId,
-                    SDK::CrGetContentsCompressedDataType_Screennail,
-                    nullptr, nullptr);
-            break;
-        }
-
+        CrInt32u infoNums = 0;
+        ret = SDK::GetRemoteTransferContentsInfoList(
+                m_device_handle, slotNumber,
+                SDK::CrGetContentsInfoListType_Range_Day,
+                &day,                // this day only
+                0,                   // rangeNum = 0 ⇒ one day
+                &m_contentsInfoList[slotIndex], &infoNums);
         if (ret != SDK::CrError_None) {
-            tout << u8"ダウンロード開始失敗 (index=" << idx << ")\n";
-            m_getContentsDataStartFlg = false;
-            continue;
+            tout << u8"ContentsInfoList 取得失敗 ("
+                 << day.year << "/" << day.month << "/" << day.day << ")\n";
+            continue;               // try previous day
         }
 
-        // ---- 進捗／完了を待機 ----
-        tout << "[" << idx + 1 << "/" << maxFiles << "] "
-             << u8"転送開始…\n";
+        // ---- Newest‑first order inside the folder ----
+        std::vector<SDK::CrContentsInfo*> infos;
+        infos.reserve(infoNums);
+        for (CrInt32u i = 0; i < infoNums; ++i)
+            infos.push_back(&m_contentsInfoList[slotIndex][i]);
 
-        std::unique_lock<std::mutex> lock(m_getContentsDataMtx);
-        while (true) {
-            m_getContentsDataMovieCv.wait(lock);
-            std::lock_guard<std::mutex> lk(m_lockgetContentsData);
+        std::sort(infos.begin(), infos.end(), [&](auto* a, auto* b) {
+            return to_time_point(a->creationDatetimeLocaltime) >
+                   to_time_point(b->creationDatetimeLocaltime);
+        });
 
-            if (m_getContentsData_notify == SDK::CrNotify_RemoteTransfer_Result_OK) {
-                tout << u8"  → 完了: " << m_getContentsData_fileName << "\n";
-                break;
-            } else if (m_getContentsData_notify == SDK::CrNotify_RemoteTransfer_Result_NG ||
-                       m_getContentsData_notify == SDK::CrNotify_RemoteTransfer_Result_DeviceBusy) {
-                tout << u8"  → 失敗\n";
-                break;
-            } else if (m_getContentsData_notify == SDK::CrNotify_RemoteTransfer_InProgress) {
-                tout << u8"  → 進行中 " << m_getContentsData_per << "%\r" << std::flush;
+        // ---- Download until quota satisfied ----
+        for (auto* ci : infos) {
+            for (CrInt32u f = 0; f < ci->filesNum; ++f) {
+                const auto& cf = ci->files[f];
+
+                m_getContentsDataStartFlg = true;
+
+                switch (kind) {
+                case RemoteTransferDataKind::Contents:
+                    ret = SDK::GetRemoteTransferContentsDataFile(
+                            m_device_handle, slotNumber,
+                            ci->contentId, cf.fileId,
+                            divisionSize, nullptr, nullptr);
+                    break;
+                case RemoteTransferDataKind::Thumbnail:
+                    ret = SDK::GetRemoteTransferContentsCompressedDataFile(
+                            m_device_handle, slotNumber,
+                            ci->contentId, cf.fileId,
+                            SDK::CrGetContentsCompressedDataType_Thumbnail,
+                            nullptr, nullptr);
+                    break;
+                case RemoteTransferDataKind::Screennail:
+                    ret = SDK::GetRemoteTransferContentsCompressedDataFile(
+                            m_device_handle, slotNumber,
+                            ci->contentId, cf.fileId,
+                            SDK::CrGetContentsCompressedDataType_Screennail,
+                            nullptr, nullptr);
+                    break;
+                }
+
+                if (ret != SDK::CrError_None) {
+                    tout << u8"ダウンロード開始失敗 (downloaded=" << downloaded << ")\n";
+                    m_getContentsDataStartFlg = false;
+                    continue;              // try next file
+                }
+
+                // ---- Wait until SDK notifies completion ----
+                tout << "[" << downloaded + 1 << "/" << numFiles << "] " << u8"転送開始…\n";
+                std::unique_lock<std::mutex> lock(m_getContentsDataMtx);
+                while (true) {
+                    m_getContentsDataMovieCv.wait(lock);
+                    std::lock_guard<std::mutex> lk(m_lockgetContentsData);
+
+                    if (m_getContentsData_notify == SDK::CrNotify_RemoteTransfer_Result_OK) {
+                        tout << u8"  → 完了: " << m_getContentsData_fileName << "\n";
+                        break;
+                    } else if (m_getContentsData_notify == SDK::CrNotify_RemoteTransfer_Result_NG ||
+                               m_getContentsData_notify == SDK::CrNotify_RemoteTransfer_Result_DeviceBusy) {
+                        tout << u8"  → 失敗\n";
+                        break;
+                    } else if (m_getContentsData_notify == SDK::CrNotify_RemoteTransfer_InProgress) {
+                        tout << u8"  → 進行中 " << m_getContentsData_per << "%\r" << std::flush;
+                    }
+                }
+                m_getContentsDataStartFlg = false;
+
+                if (++downloaded >= numFiles) break;   // obtained quota
             }
+            if (downloaded >= numFiles) break;
         }
-        m_getContentsDataStartFlg = false;
     }
+
+    if (downloaded == 0) {
+        tout << u8"対象ファイルがありません\n";
+        return false;
+    }
+
     return true;
 }
+
 
 
 void CameraDevice::setMoviePlaybackSetting()
