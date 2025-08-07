@@ -2395,54 +2395,13 @@ void CameraDevice::set_select_media_format()
     }
 }
 
-void CameraDevice::execute_movie_rec()
+void CameraDevice::execute_movie_rec(bool down)
 {
-    load_properties();
-
-    text input;
-    tout << std::endl << "Operate the movie recording button ? (y/n): ";
-    std::getline(tin, input);
-    if (input != TEXT("y")) {
-        tout << "Skip .\n";
-        return;
-    }
-
-    tout << "Choose a number:\n";
-    tout << "[-1] Cancel input\n";
-
-    tout << "[1] Up" << '\n';
-    tout << "[2] Down" << '\n';
-
-    tout << "[-1] Cancel input\n";
-    tout << "Choose a number:\n";
-
-    tout << std::endl << "input> ";
-    std::getline(tin, input);
-    text_stringstream ss(input);
-    int selected_index = 0;
-    ss >> selected_index;
-
-    if (selected_index < 0) {
-        tout << "Input cancelled.\n";
-        return;
-    }
-
     CrInt64u ptpValue = 0;
-    switch (selected_index) {
-    case 1:
-        ptpValue = SDK::CrCommandParam::CrCommandParam_Up;
-        break;
-    case 2:
+    if(down){
         ptpValue = SDK::CrCommandParam::CrCommandParam_Down;
-        break;
-    default:
-        selected_index = -1;
-        break;
-    }
-
-    if (-1 == selected_index) {
-        tout << "Input cancelled.\n";
-        return;
+    }else{
+        ptpValue = SDK::CrCommandParam::CrCommandParam_Up;
     }
 
     bool getContentsDataFlg = false;

@@ -22,6 +22,7 @@ public:
     bool disconnect_camera(int no);
 
     bool capture_image(int no);
+    bool execute_movie_rec(int no, bool down);
     int get_iso(int no);
     bool get_live_view(int no, py::buffer py_buf);
     bool download_latest_files(int no, int slot, int file_num, int mode);

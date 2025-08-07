@@ -147,6 +147,14 @@ bool PyCrSDK::capture_image(int no)
     return true;
 }
 
+bool PyCrSDK::execute_movie_rec(int no, bool down)
+{
+    CameraDevicePtr camera = nullptr;
+    if(!findTarget(no,camera,true))return false;
+    camera->execute_movie_rec(down);
+    return true;
+}
+
 // get ISO value
 int PyCrSDK::get_iso(int no)
 {

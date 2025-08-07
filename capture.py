@@ -21,14 +21,14 @@ if not cams:
 else:
     # 3) 先頭のカメラに接続
     print("Connecting to the first camera...")
-    if cam.connect_camera(0):
+    if cam.connect_camera(0,0):
         time.sleep(3)  # Wait for the camera to connect
         # 4) シャッターを切る
         print("getting ISO value...")
         iso_value = cam.get_iso(0)
         print("ISO value:", iso_value)
 
-
+        time.sleep(2)  # Wait for the ISO value to be retrieved
         img_size = 1024*1024  # 例: 最大1MBと想定
 
         # Pythonでバッファを用意
@@ -37,7 +37,8 @@ else:
         # C++関数を呼び出し、データを直接書き込む
         while 1:
             try:
-                cam.get_live_view(0, buf)
+                #cam.get_live_view(0, buf)
+                cam.get_osd_view(0, buf)
                 arr = np.frombuffer(buf, dtype=np.uint8)
                 img = cv2.imdecode(arr, cv2.IMREAD_COLOR)  # BGR画像としてデコード
                 cv2.imshow("LiveView", img)
@@ -60,7 +61,7 @@ else:
         #print("Capture result:", success)
 
         # 5) 切断
-        cam.disconnect_camera()
+        cam.disconnect_camera(0)
 
 # 6) SDK解放
 cam.sdk_release()
