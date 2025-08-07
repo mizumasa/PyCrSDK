@@ -407,34 +407,48 @@ void CameraDevice::continuous_shooting()
     }
 }
 
-void CameraDevice::get_aperture()
+void CameraDevice::print_aperture()
 {
     load_properties();
-    tout << format_f_number(m_prop.f_number.current) << '\n';
+    if (1 != m_prop.f_number.writable) {
+        tout << "Aperture is not writable\n";
+        return;
+    }
+    auto& values = m_prop.f_number.possible;
+    for (std::size_t i = 0; i < values.size(); ++i) {
+        tout << '[' << i << "] " << format_f_number(values[i]) << '\n';
+    }
 }
 
-void CameraDevice::get_iso()
+int CameraDevice::get_aperture()
 {
     load_properties();
-
-    tout << "ISO: " << format_iso_sensitivity(m_prop.iso_sensitivity.current) << '\n';
+    //tout << format_f_number(m_prop.f_number.current) << '\n';
+    return m_prop.f_number.current;
 }
 
-void CameraDevice::get_shutter_speed()
+int CameraDevice::get_iso()
 {
     load_properties();
-    tout << "Shutter Speed: " << format_shutter_speed(m_prop.shutter_speed.current) << '\n';
+    //tout << "ISO: " << format_iso_sensitivity(m_prop.iso_sensitivity.current) << '\n';
+    return m_prop.iso_sensitivity.current;
 }
 
-bool CameraDevice::get_extended_shutter_speed()
+int CameraDevice::get_shutter_speed()
+{
+    load_properties();
+    //tout << "Shutter Speed: " << format_shutter_speed(m_prop.shutter_speed.current) << '\n';
+    return m_prop.shutter_speed.current;
+}
+
+int CameraDevice::get_extended_shutter_speed()
 {
     load_properties();
     if (-1 == m_prop.extended_shutter_speed.writable) {
         tout << "Extended Shutter Speed is not supported.\n";
-        return false;
+        return -1;
     }
-    tout << "Extended Shutter Speed: " << format_extended_shutter_speed(m_prop.extended_shutter_speed.current) << '\n';
-    return true;
+    return m_prop.extended_shutter_speed.current;
 }
 
 void CameraDevice::get_position_key_setting()
@@ -1560,6 +1574,18 @@ void CameraDevice::set_aperture()
     SDK::SetDeviceProperty(m_device_handle, &prop);
 }
 
+void CameraDevice::print_iso(){
+    if (1 != m_prop.iso_sensitivity.writable) {
+        // Not a settable property
+        tout << "ISO is not writable\n";
+        return;
+    }
+    auto& values = m_prop.iso_sensitivity.possible;
+    for (std::size_t i = 0; i < values.size(); ++i) {
+        tout << '[' << i << "] " << format_iso_sensitivity(values[i]) << '\n';
+    }
+}
+
 void CameraDevice::set_iso()
 {
     if (1 != m_prop.iso_sensitivity.writable) {
@@ -1631,6 +1657,18 @@ bool CameraDevice::set_save_info() const
     return true;
 }
 
+void CameraDevice::print_shutter_speed()
+{
+    if (1 != m_prop.shutter_speed.writable) {
+        tout << "Shutter Speed is not writable\n";
+        return;
+    }
+    auto& values = m_prop.shutter_speed.possible;
+    for (std::size_t i = 0; i < values.size(); ++i) {
+        tout << '[' << i << "] " << format_shutter_speed(values[i]) << '\n';
+    }
+}
+
 void CameraDevice::set_shutter_speed()
 {
     if (1 != m_prop.shutter_speed.writable) {
@@ -1675,6 +1713,18 @@ void CameraDevice::set_shutter_speed()
     prop.SetValueType(SDK::CrDataType::CrDataType_UInt32Array);
 
     SDK::SetDeviceProperty(m_device_handle, &prop);
+}
+
+void CameraDevice::print_extended_shutter_speed(){
+    if (1 != m_prop.extended_shutter_speed.writable) {
+        // Not a extended settable property
+        tout << "Extended Shutter Speed is not writable\n";
+        return;
+    }
+    auto& values = m_prop.extended_shutter_speed.possible;
+    for (std::size_t i = 0; i < values.size(); ++i) {
+        tout << '[' << i << "] " << format_extended_shutter_speed(values[i]) << '\n';
+    }
 }
 
 void CameraDevice::set_extended_shutter_speed()

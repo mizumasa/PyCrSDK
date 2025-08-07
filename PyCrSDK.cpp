@@ -156,13 +156,67 @@ bool PyCrSDK::execute_movie_rec(int no, bool down)
 }
 
 // get ISO value
+int PyCrSDK::get_aperture(int no)
+{
+    CameraDevicePtr camera = nullptr;
+    if(!findTarget(no,camera,true))return -1;
+    return camera->get_aperture();
+}
+
 int PyCrSDK::get_iso(int no)
 {
     CameraDevicePtr camera = nullptr;
     if(!findTarget(no,camera,true))return -1;
-    camera->get_iso();
-    return 100;
+    return camera->get_iso();
 }
+
+int PyCrSDK::get_shutter_speed(int no)
+{
+    CameraDevicePtr camera = nullptr;
+    if(!findTarget(no,camera,true))return -1;
+    return camera->get_shutter_speed();
+}
+
+int PyCrSDK::get_extended_shutter_speed(int no)
+{
+    CameraDevicePtr camera = nullptr;
+    if(!findTarget(no,camera,true))return -1;
+    return camera->get_extended_shutter_speed();
+}
+
+void PyCrSDK::print_aperture(int no)
+{
+    CameraDevicePtr camera = nullptr;
+    if(!findTarget(no,camera,true))return;
+    camera->print_aperture();
+    return; 
+}
+
+void PyCrSDK::print_iso(int no)
+{
+    CameraDevicePtr camera = nullptr;
+    if(!findTarget(no,camera,true))return;
+    camera->print_iso();
+    return;
+}
+
+void PyCrSDK::print_shutter_speed(int no)
+{
+    CameraDevicePtr camera = nullptr;
+    if(!findTarget(no,camera,true))return;
+    camera->print_shutter_speed();
+    return;
+}
+
+void PyCrSDK::print_extended_shutter_speed(int no)
+{
+    CameraDevicePtr camera = nullptr;
+    if(!findTarget(no,camera,true))return;
+    camera->print_extended_shutter_speed();
+    return;
+}
+
+
 
 bool PyCrSDK::get_live_view(int no, py::buffer py_buf)
 {

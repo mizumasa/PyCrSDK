@@ -23,7 +23,17 @@ public:
 
     bool capture_image(int no);
     bool execute_movie_rec(int no, bool down);
-    int get_iso(int no);
+
+    int  get_aperture(int no);
+    int  get_iso(int no);
+    int  get_shutter_speed(int no);
+    int  get_extended_shutter_speed(int no);
+
+    void  print_aperture(int no);
+    void  print_iso(int no);
+    void  print_shutter_speed(int no);
+    void  print_extended_shutter_speed(int no);
+
     bool get_live_view(int no, py::buffer py_buf);
     bool download_latest_files(int no, int slot, int file_num, int mode);
     std::string get_connected_model() const;

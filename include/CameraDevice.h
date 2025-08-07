@@ -94,10 +94,16 @@ public:
     /*** Property operations ***/
     // Should be const functions, but requires load property, which is not
 
-    void get_aperture();
-    void get_iso();
-    void get_shutter_speed();
-    bool get_extended_shutter_speed();
+    void  print_aperture();
+    void  print_iso();
+    void  print_shutter_speed();
+    void  print_extended_shutter_speed();
+
+    int  get_aperture();
+    int  get_iso();
+    int  get_shutter_speed();
+    int  get_extended_shutter_speed();
+    
     void get_position_key_setting();
     void get_exposure_program_mode();
     void get_still_capture_mode();
