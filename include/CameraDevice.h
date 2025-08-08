@@ -159,11 +159,13 @@ public:
     void get_osd_image();
     bool get_zoom_position_setting();
 
-    void set_aperture();
-    void set_iso();
     bool set_save_info() const;
-    void set_shutter_speed();
-    void set_extended_shutter_speed();
+
+    bool set_aperture(int value);
+    bool set_iso(int value);
+    bool set_shutter_speed(int value);
+    bool set_extended_shutter_speed(int value);
+
     void set_position_key_setting();
     void set_exposure_program_mode();
     void set_still_capture_mode();

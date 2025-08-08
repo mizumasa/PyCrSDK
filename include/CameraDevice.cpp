@@ -1601,50 +1601,25 @@ bool CameraDevice::get_time_shift_shooting()
     return true;
 }
 
-void CameraDevice::set_aperture()
+bool CameraDevice::set_aperture(int selected_index)
 {
     if (1 != m_prop.f_number.writable) {
         // Not a settable property
         tout << "Aperture is not writable\n";
-        return;
+        return false;
     }
-
-    text input;
-    tout << "Would you like to set a new Aperture value? (y/n): ";
-    std::getline(tin, input);
-    if (input != TEXT("y")) {
-        tout << "Skip setting a new value.\n";
-        return;
-    }
-
-    tout << "Choose a number set a new Aperture value:\n";
-    tout << "[-1] Cancel input\n";
-
     auto& values = m_prop.f_number.possible;
-    for (std::size_t i = 0; i < values.size(); ++i) {
-        tout << '[' << i << "] " << format_f_number(values[i]) << '\n';
-    }
-
-    tout << "[-1] Cancel input\n";
-    tout << "Choose a number set a new Aperture value:\n";
-
-    tout << "input> ";
-    std::getline(tin, input);
-    text_stringstream ss(input);
-    int selected_index = 0;
-    ss >> selected_index;
-
     if (selected_index < 0 || values.size() <= selected_index) {
-        tout << "Input cancelled.\n";
-        return;
+        tout << "Invalid Aperture value\n";
+        return false;
     }
 
     SDK::CrDeviceProperty prop;
     prop.SetCode(SDK::CrDevicePropertyCode::CrDeviceProperty_FNumber);
     prop.SetCurrentValue(values[selected_index]);
     prop.SetValueType(SDK::CrDataType::CrDataType_UInt16Array);
-
     SDK::SetDeviceProperty(m_device_handle, &prop);
+    return true;
 }
 
 void CameraDevice::print_iso(){
@@ -1659,42 +1634,19 @@ void CameraDevice::print_iso(){
     }
 }
 
-void CameraDevice::set_iso()
+bool CameraDevice::set_iso(int selected_index)
 {
     if (1 != m_prop.iso_sensitivity.writable) {
         // Not a settable property
         tout << "ISO is not writable\n";
-        return;
+        return false;
     }
-
-    text input;
-    tout << "Would you like to set a new ISO value? (y/n): ";
-    std::getline(tin, input);
-    if (input != TEXT("y")) {
-        tout << "Skip setting a new value.\n";
-        return;
-    }
-
-    tout << "Choose a number set a new ISO value:\n";
-    tout << "[-1] Cancel input\n";
 
     auto& values = m_prop.iso_sensitivity.possible;
-    for (std::size_t i = 0; i < values.size(); ++i) {
-        tout << '[' << i << "] " << format_iso_sensitivity(values[i]) << '\n';
-    }
-
-    tout << "[-1] Cancel input\n";
-    tout << "Choose a number set a new ISO value:\n";
-
-    tout << "input> ";
-    std::getline(tin, input);
-    text_stringstream ss(input);
-    int selected_index = 0;
-    ss >> selected_index;
 
     if (selected_index < 0 || values.size() <= selected_index) {
-        tout << "Input cancelled.\n";
-        return;
+        tout << "ISO out of range.\n";
+        return false;
     }
 
     SDK::CrDeviceProperty prop;
@@ -1703,6 +1655,7 @@ void CameraDevice::set_iso()
     prop.SetValueType(SDK::CrDataType::CrDataType_UInt32Array);
 
     SDK::SetDeviceProperty(m_device_handle, &prop);
+    return true;
 }
 
 bool CameraDevice::set_save_info() const
@@ -1742,50 +1695,26 @@ void CameraDevice::print_shutter_speed()
     }
 }
 
-void CameraDevice::set_shutter_speed()
+bool CameraDevice::set_shutter_speed(int selected_index)
 {
     if (1 != m_prop.shutter_speed.writable) {
         // Not a settable property
         tout << "Shutter Speed is not writable\n";
-        return;
+        return false;
     }
-
-    text input;
-    tout << "Would you like to set a new Shutter Speed value? (y/n): ";
-    std::getline(tin, input);
-    if (input != TEXT("y")) {
-        tout << "Skip setting a new value.\n";
-        return;
-    }
-
-    tout << "Choose a number set a new Shutter Speed value:\n";
-    tout << "[-1] Cancel input\n";
 
     auto& values = m_prop.shutter_speed.possible;
-    for (std::size_t i = 0; i < values.size(); ++i) {
-        tout << '[' << i << "] " << format_shutter_speed(values[i]) << '\n';
-    }
-
-    tout << "[-1] Cancel input\n";
-    tout << "Choose a number set a new Shutter Speed value:\n";
-
-    tout << "input> ";
-    std::getline(tin, input);
-    text_stringstream ss(input);
-    int selected_index = 0;
-    ss >> selected_index;
-
     if (selected_index < 0 || values.size() <= selected_index) {
-        tout << "Input cancelled.\n";
-        return;
+        tout << "Invalid shutter value\n";
+        return false;
     }
 
     SDK::CrDeviceProperty prop;
     prop.SetCode(SDK::CrDevicePropertyCode::CrDeviceProperty_ShutterSpeed);
     prop.SetCurrentValue(values[selected_index]);
     prop.SetValueType(SDK::CrDataType::CrDataType_UInt32Array);
-
     SDK::SetDeviceProperty(m_device_handle, &prop);
+    return true;
 }
 
 void CameraDevice::print_extended_shutter_speed(){
@@ -1800,53 +1729,25 @@ void CameraDevice::print_extended_shutter_speed(){
     }
 }
 
-void CameraDevice::set_extended_shutter_speed()
+bool CameraDevice::set_extended_shutter_speed(int selected_index)
 {
-    if (false == get_extended_shutter_speed())
-        return;
-
     if (1 != m_prop.extended_shutter_speed.writable) {
         // Not a extended settable property
         tout << "Extended Shutter Speed is not writable\n";
-        return;
+        return false;
     }
-
-    text input;
-    tout << "Would you like to set a new Extended Shutter Speed value? (y/n): ";
-    std::getline(tin, input);
-    if (input != TEXT("y")) {
-        tout << "Skip extended setting a new value.\n";
-        return;
-    }
-
-    tout << "Choose a number set a new Extended Shutter Speed value:\n";
-    tout << "[-1] Cancel input\n";
-
     auto& values = m_prop.extended_shutter_speed.possible;
-    for (std::size_t i = 0; i < values.size(); ++i) {
-        tout << '[' << i << "] " << format_extended_shutter_speed(values[i]) << '\n';
-    }
-
-    tout << "[-1] Cancel input\n";
-    tout << "Choose a number set a new Extended Shutter Speed value:\n";
-
-    tout << "input> ";
-    std::getline(tin, input);
-    text_stringstream ss(input);
-    int selected_index = 0;
-    ss >> selected_index;
-
     if (selected_index < 0 || values.size() <= selected_index) {
-        tout << "Input cancelled.\n";
-        return;
+        tout << "Invalid shutter value\n";
+        return false;
     }
 
     SDK::CrDeviceProperty prop;
     prop.SetCode(SDK::CrDevicePropertyCode::CrDeviceProperty_ExtendedShutterSpeed);
     prop.SetCurrentValue(values[selected_index]);
     prop.SetValueType(SDK::CrDataType::CrDataType_UInt64Array);
-
     SDK::SetDeviceProperty(m_device_handle, &prop);
+    return true;
 }
 
 void CameraDevice::set_position_key_setting()

@@ -216,6 +216,34 @@ void PyCrSDK::print_extended_shutter_speed(int no)
     return;
 }
 
+bool PyCrSDK::set_aperture(int no, int value)
+{
+    CameraDevicePtr camera = nullptr;
+    if(!findTarget(no,camera,true))return false;
+    return camera->set_aperture(value);
+}
+
+bool PyCrSDK::set_iso(int no, int value)
+{
+    CameraDevicePtr camera = nullptr;
+    if(!findTarget(no,camera,true))return false;
+    return camera->set_iso(value);
+}
+
+bool PyCrSDK::set_shutter_speed(int no, int value)
+{
+    CameraDevicePtr camera = nullptr;
+    if(!findTarget(no,camera,true))return false;
+    return camera->set_shutter_speed(value);
+}
+
+bool PyCrSDK::set_extended_shutter_speed(int no, int value)
+{
+    CameraDevicePtr camera = nullptr;
+    if(!findTarget(no,camera,true))return false;
+    return camera->set_extended_shutter_speed(value);
+}
+
 int PyCrSDK::get_zoom_current_position(int no)
 {
     CameraDevicePtr camera = nullptr;
