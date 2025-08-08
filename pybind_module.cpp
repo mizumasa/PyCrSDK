@@ -25,6 +25,13 @@ PYBIND11_MODULE(pycrsdk, m) {
         .def("print_iso", &PyCrSDK::print_iso, py::arg("no"))
         .def("print_shutter_speed", &PyCrSDK::print_shutter_speed, py::arg("no"))
         .def("print_extended_shutter_speed", &PyCrSDK::print_extended_shutter_speed, py::arg("no"))
+        .def("get_zoom_current_position", &PyCrSDK::get_zoom_current_position, py::arg("no"))
+        .def("get_zoom_max_position", &PyCrSDK::get_zoom_max_position, py::arg("no"))
+        .def("get_zoom_min_position", &PyCrSDK::get_zoom_min_position, py::arg("no"))
+        .def("get_zoom_position_step", &PyCrSDK::get_zoom_position_step, py::arg("no"))
+        .def("get_zoom_max_speed", &PyCrSDK::get_zoom_max_speed, py::arg("no"))
+        .def("get_zoom_min_speed", &PyCrSDK::get_zoom_min_speed, py::arg("no"))
+        .def("set_zoom_speed", &PyCrSDK::set_zoom_speed, py::arg("no"),py::arg("speed"))
         .def("get_live_view", &PyCrSDK::get_live_view, py::arg("no"), py::arg("py_buf"))
         .def("download_latest_files", &PyCrSDK::download_latest_files,
               py::arg("no"), py::arg("slot"), py::arg("file_num"), py::arg("mode"))

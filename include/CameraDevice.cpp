@@ -1108,6 +1108,79 @@ void CameraDevice::get_zoom_operation()
     }
 }
 
+int CameraDevice::get_zoom_current_position()
+{
+    load_properties();
+    // Zoom Distance
+    if (-1 == m_prop.zoom_distance.writable) {
+        tout << "Zoom Distance is not supported.\n";
+        return -1;
+    }
+    else {
+        return m_prop.zoom_distance.current;
+    }
+}
+
+int CameraDevice::get_zoom_max_position()
+{
+    load_properties();
+    // Zoom Distance
+    if (-1 == m_prop.zoom_distance.writable) {
+        tout << "Zoom Distance is not supported.\n";
+        return -1;
+    }
+    else {
+        return m_prop.zoom_distance.possible.at(1);
+    }
+}
+
+int CameraDevice::get_zoom_min_position()
+{
+    load_properties();
+    // Zoom Distance
+    if (-1 == m_prop.zoom_distance.writable) {
+        tout << "Zoom Distance is not supported.\n";
+        return -1;
+    }
+    else {
+        return m_prop.zoom_distance.possible.at(0);
+    }
+}
+
+int CameraDevice::get_zoom_position_step()
+{
+    load_properties();
+    // Zoom Distance
+    if (-1 == m_prop.zoom_distance.writable) {
+        tout << "Zoom Distance is not supported.\n";
+        return -1;
+    }
+    else {
+        return m_prop.zoom_distance.possible.at(2);
+    }
+}
+
+int CameraDevice::get_zoom_max_speed()
+{
+    load_properties();
+    if (m_prop.zoom_speed_range.possible.size() < 2) {
+        return 1; 
+    }
+    else {
+        return (int)m_prop.zoom_speed_range.possible.at(1);
+    }
+}
+int CameraDevice::get_zoom_min_speed()
+{
+    load_properties();
+    if (m_prop.zoom_speed_range.possible.size() < 2) {
+        return -1; 
+    }
+    else {
+        return (int)m_prop.zoom_speed_range.possible.at(0);
+    }
+}
+
 void CameraDevice::get_remocon_zoom_speed_type()
 {
     load_properties();
@@ -2662,6 +2735,43 @@ void CameraDevice::set_zoom_operation()
         }
         get_zoom_operation();
     }
+}
+
+bool CameraDevice::set_zoom_speed(int zoom_speed)
+{
+    load_properties();
+    CrInt64 ptpValue = 0;
+    // Zoom Speed Range is not supported
+    if (m_prop.zoom_speed_range.possible.size() < 2) {
+        if(zoom_speed==0) {
+            ptpValue = SDK::CrZoomOperation::CrZoomOperation_Stop;
+        }
+        if(zoom_speed>0) {
+            ptpValue = SDK::CrZoomOperation::CrZoomOperation_Tele;
+        }
+        if(zoom_speed<0) {
+            ptpValue = SDK::CrZoomOperation::CrZoomOperation_Wide;
+        }
+    }
+    else{
+        if (((zoom_speed == 0)) || (zoom_speed < (int)m_prop.zoom_speed_range.possible.at(0)) || ((int)m_prop.zoom_speed_range.possible.at(1) < zoom_speed))
+        {
+            ptpValue = SDK::CrZoomOperation::CrZoomOperation_Stop;
+        }
+        else {
+            ptpValue = (CrInt64)zoom_speed;
+        }
+    }
+    if (SDK::CrZoomOperationEnableStatus::CrZoomOperationEnableStatus_Enable != m_prop.zoom_operation_status.current) {
+        tout << "Zoom Operation is not executable.\n";
+        return false;
+    }
+    SDK::CrDeviceProperty prop;
+    prop.SetCode(SDK::CrDevicePropertyCode::CrDeviceProperty_Zoom_Operation);
+    prop.SetCurrentValue((CrInt64u)ptpValue);
+    prop.SetValueType(SDK::CrDataType::CrDataType_UInt16Array);
+    SDK::SetDeviceProperty(m_device_handle, &prop);
+    return true;
 }
 
 void CameraDevice::set_remocon_zoom_speed_type()

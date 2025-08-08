@@ -34,6 +34,14 @@ public:
     void  print_shutter_speed(int no);
     void  print_extended_shutter_speed(int no);
 
+    int  get_zoom_current_position(int no);
+    int  get_zoom_max_position(int no);
+    int  get_zoom_min_position(int no);
+    int  get_zoom_position_step(int no);
+    int  get_zoom_max_speed(int no);
+    int  get_zoom_min_speed(int no);
+    bool set_zoom_speed(int no, int speed);
+    
     bool get_live_view(int no, py::buffer py_buf);
     bool download_latest_files(int no, int slot, int file_num, int mode);
     std::string get_connected_model() const;

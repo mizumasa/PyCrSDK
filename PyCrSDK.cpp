@@ -216,7 +216,54 @@ void PyCrSDK::print_extended_shutter_speed(int no)
     return;
 }
 
+int PyCrSDK::get_zoom_current_position(int no)
+{
+    CameraDevicePtr camera = nullptr;
+    if(!findTarget(no,camera,true))return -1;
+    return camera->get_zoom_current_position();
+}
 
+int PyCrSDK::get_zoom_max_position(int no)
+{
+    CameraDevicePtr camera = nullptr;
+    if(!findTarget(no,camera,true))return -1;
+    return camera->get_zoom_max_position();
+}
+
+int PyCrSDK::get_zoom_min_position(int no)
+{
+    CameraDevicePtr camera = nullptr;
+    if(!findTarget(no,camera,true))return -1;
+    return camera->get_zoom_min_position();
+}
+
+int PyCrSDK::get_zoom_position_step(int no)
+{
+    CameraDevicePtr camera = nullptr;
+    if(!findTarget(no,camera,true))return -1;
+    return camera->get_zoom_position_step();
+}
+
+int PyCrSDK::get_zoom_max_speed(int no)
+{
+    CameraDevicePtr camera = nullptr;
+    if(!findTarget(no,camera,true)) return -1;
+    return camera->get_zoom_max_speed();
+}
+
+int PyCrSDK::get_zoom_min_speed(int no)
+{
+    CameraDevicePtr camera = nullptr;
+    if(!findTarget(no,camera,true))return -1;
+    return camera->get_zoom_min_speed();
+}
+
+bool PyCrSDK::set_zoom_speed(int no, int speed)
+{
+    CameraDevicePtr camera = nullptr;
+    if(!findTarget(no,camera,true))return false;
+    return camera->set_zoom_speed(speed);
+}
 
 bool PyCrSDK::get_live_view(int no, py::buffer py_buf)
 {

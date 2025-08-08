@@ -103,7 +103,7 @@ public:
     int  get_iso();
     int  get_shutter_speed();
     int  get_extended_shutter_speed();
-    
+
     void get_position_key_setting();
     void get_exposure_program_mode();
     void get_still_capture_mode();
@@ -118,6 +118,12 @@ public:
     void get_white_balance();
     bool get_custom_wb();
     void get_zoom_operation();
+    int  get_zoom_current_position();
+    int  get_zoom_max_position();
+    int  get_zoom_min_position();
+    int  get_zoom_position_step();
+    int  get_zoom_max_speed();
+    int  get_zoom_min_speed();
     void get_remocon_zoom_speed_type();
     bool get_aps_c_or_full_switching_setting();
     bool get_camera_setting_saveread_state();
@@ -168,6 +174,7 @@ public:
     void set_white_balance();
     void set_custom_wb();
     void set_zoom_operation();
+    bool set_zoom_speed(int speed);
     void set_remocon_zoom_speed_type();
     bool set_drive_mode(CrInt64u value);
     void execute_camera_setting_reset();
