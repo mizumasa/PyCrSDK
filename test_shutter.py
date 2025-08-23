@@ -27,27 +27,19 @@ if not cams:
 else:
     # 3) 先頭のカメラに接続
     print("Connecting to the first camera...")
-    cam.connect_camera(0,2)
+    cam.connect_camera(0,0)
     time.sleep(2)
-    iso_value = cam.get_iso(0)
-    print("ISO value:", iso_value)
+    print("ISO value:", cam.get_iso(0))
+    print("aperture value:", cam.get_aperture(0))
+    print("shutter speed value:", cam.get_shutter_speed(0))
+    print("extended shutter speed value:", cam.get_extended_shutter_speed(0))
+    time.sleep(1)
+    cam.print_shutter_speed(0)
+    time.sleep(1)
+    cam.set_shutter_speed(0, 5)  # Example shutter speed value
     time.sleep(2)
-    cam.execute_movie_rec(0, True)  # 開始
-    time.sleep(4)
-    cam.execute_movie_rec(0, False)  # 停止
-    time.sleep(4)
-    #cam.download_latest_files(0, 0, 1, 0)
-    cam.disconnect_camera(0)
-    time.sleep(5)
-    iso_value = cam.get_iso(0)
-    print("ISO value:", iso_value)
-    time.sleep(5)
-    print("Connecting to the first camera again...")
-    cam.connect_camera(0,2)
-    time.sleep(5)
-    iso_value = cam.get_iso(0)
-    print("ISO value:", iso_value)
-    time.sleep(5)
+    cam.set_shutter_speed(0, 20)  # Example shutter speed value
+    time.sleep(2)
     cam.disconnect_camera(0)
     
 # 6) SDK解放

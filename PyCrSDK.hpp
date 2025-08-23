@@ -6,11 +6,11 @@
 #include "CameraDevice.h"
 #include "Text.h"
 
-class PyCrSDK
+class CameraManager
 {
 public:
-    PyCrSDK();
-    ~PyCrSDK();
+    CameraManager();
+    ~CameraManager();
 
     // ---------- Public API ----------
     bool sdk_init();

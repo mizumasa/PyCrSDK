@@ -4,12 +4,12 @@
 namespace SDK = SCRSDK;
 
 // ----------------------------------------------------------------
-PyCrSDK::PyCrSDK() = default;
-PyCrSDK::~PyCrSDK() { if (m_sdk_inited) sdk_release(); }
+CameraManager::CameraManager() = default;
+CameraManager::~CameraManager() { if (m_sdk_inited) sdk_release(); }
 // ----------------------------------------------------------------
 
 // ==== SDK init / release ========================================
-bool PyCrSDK::sdk_init()
+bool CameraManager::sdk_init()
 {
     if (m_sdk_inited) return true;
     if (!SDK::Init()) { std::cerr << "[PyCrSDK] SDK Init failed\n"; return false; }
@@ -20,7 +20,7 @@ bool PyCrSDK::sdk_init()
     return true;
 }
 
-void PyCrSDK::sdk_release()
+void CameraManager::sdk_release()
 {
     if (!m_sdk_inited) return;
     //disconnect_camera();
@@ -30,7 +30,7 @@ void PyCrSDK::sdk_release()
 // ----------------------------------------------------------------
 
 // ==== enumeration ==============================================
-int PyCrSDK::enumerate_cameras()
+int CameraManager::enumerate_cameras()
 {
     m_cam_list.clear();
     auto err = SDK::EnumCameraObjects(&camera_list);
@@ -81,7 +81,7 @@ int PyCrSDK::enumerate_cameras()
 // ----------------------------------------------------------------
 
 // ==== connect / disconnect ======================================
-bool PyCrSDK::connect_camera(int no, int mode)
+bool CameraManager::connect_camera(int no, int mode)
 {
     if (!camera_list){
         std::cerr << "[PyCrSDK] No camera list available. Please enumerate cameras first.\n";
@@ -127,7 +127,7 @@ bool PyCrSDK::connect_camera(int no, int mode)
     return true;
 }
 
-bool PyCrSDK::disconnect_camera(int no)
+bool CameraManager::disconnect_camera(int no)
 {
     CameraDevicePtr camera = nullptr;
     if(!findTarget(no,camera,true))return false;
@@ -139,7 +139,7 @@ bool PyCrSDK::disconnect_camera(int no)
 // ----------------------------------------------------------------
 
 // ==== shutter ====================================================
-bool PyCrSDK::capture_image(int no)
+bool CameraManager::capture_image(int no)
 {
     CameraDevicePtr camera = nullptr;
     if(!findTarget(no,camera,true))return false;
@@ -147,7 +147,7 @@ bool PyCrSDK::capture_image(int no)
     return true;
 }
 
-bool PyCrSDK::execute_movie_rec(int no, bool down)
+bool CameraManager::execute_movie_rec(int no, bool down)
 {
     CameraDevicePtr camera = nullptr;
     if(!findTarget(no,camera,true))return false;
@@ -156,35 +156,35 @@ bool PyCrSDK::execute_movie_rec(int no, bool down)
 }
 
 // get ISO value
-int PyCrSDK::get_aperture(int no)
+int CameraManager::get_aperture(int no)
 {
     CameraDevicePtr camera = nullptr;
     if(!findTarget(no,camera,true))return -1;
     return camera->get_aperture();
 }
 
-int PyCrSDK::get_iso(int no)
+int CameraManager::get_iso(int no)
 {
     CameraDevicePtr camera = nullptr;
     if(!findTarget(no,camera,true))return -1;
     return camera->get_iso();
 }
 
-int PyCrSDK::get_shutter_speed(int no)
+int CameraManager::get_shutter_speed(int no)
 {
     CameraDevicePtr camera = nullptr;
     if(!findTarget(no,camera,true))return -1;
     return camera->get_shutter_speed();
 }
 
-int PyCrSDK::get_extended_shutter_speed(int no)
+int CameraManager::get_extended_shutter_speed(int no)
 {
     CameraDevicePtr camera = nullptr;
     if(!findTarget(no,camera,true))return -1;
     return camera->get_extended_shutter_speed();
 }
 
-void PyCrSDK::print_aperture(int no)
+void CameraManager::print_aperture(int no)
 {
     CameraDevicePtr camera = nullptr;
     if(!findTarget(no,camera,true))return;
@@ -192,7 +192,7 @@ void PyCrSDK::print_aperture(int no)
     return; 
 }
 
-void PyCrSDK::print_iso(int no)
+void CameraManager::print_iso(int no)
 {
     CameraDevicePtr camera = nullptr;
     if(!findTarget(no,camera,true))return;
@@ -200,7 +200,7 @@ void PyCrSDK::print_iso(int no)
     return;
 }
 
-void PyCrSDK::print_shutter_speed(int no)
+void CameraManager::print_shutter_speed(int no)
 {
     CameraDevicePtr camera = nullptr;
     if(!findTarget(no,camera,true))return;
@@ -208,7 +208,7 @@ void PyCrSDK::print_shutter_speed(int no)
     return;
 }
 
-void PyCrSDK::print_extended_shutter_speed(int no)
+void CameraManager::print_extended_shutter_speed(int no)
 {
     CameraDevicePtr camera = nullptr;
     if(!findTarget(no,camera,true))return;
@@ -216,84 +216,84 @@ void PyCrSDK::print_extended_shutter_speed(int no)
     return;
 }
 
-bool PyCrSDK::set_aperture(int no, int value)
+bool CameraManager::set_aperture(int no, int value)
 {
     CameraDevicePtr camera = nullptr;
     if(!findTarget(no,camera,true))return false;
     return camera->set_aperture(value);
 }
 
-bool PyCrSDK::set_iso(int no, int value)
+bool CameraManager::set_iso(int no, int value)
 {
     CameraDevicePtr camera = nullptr;
     if(!findTarget(no,camera,true))return false;
     return camera->set_iso(value);
 }
 
-bool PyCrSDK::set_shutter_speed(int no, int value)
+bool CameraManager::set_shutter_speed(int no, int value)
 {
     CameraDevicePtr camera = nullptr;
     if(!findTarget(no,camera,true))return false;
     return camera->set_shutter_speed(value);
 }
 
-bool PyCrSDK::set_extended_shutter_speed(int no, int value)
+bool CameraManager::set_extended_shutter_speed(int no, int value)
 {
     CameraDevicePtr camera = nullptr;
     if(!findTarget(no,camera,true))return false;
     return camera->set_extended_shutter_speed(value);
 }
 
-int PyCrSDK::get_zoom_current_position(int no)
+int CameraManager::get_zoom_current_position(int no)
 {
     CameraDevicePtr camera = nullptr;
     if(!findTarget(no,camera,true))return -1;
     return camera->get_zoom_current_position();
 }
 
-int PyCrSDK::get_zoom_max_position(int no)
+int CameraManager::get_zoom_max_position(int no)
 {
     CameraDevicePtr camera = nullptr;
     if(!findTarget(no,camera,true))return -1;
     return camera->get_zoom_max_position();
 }
 
-int PyCrSDK::get_zoom_min_position(int no)
+int CameraManager::get_zoom_min_position(int no)
 {
     CameraDevicePtr camera = nullptr;
     if(!findTarget(no,camera,true))return -1;
     return camera->get_zoom_min_position();
 }
 
-int PyCrSDK::get_zoom_position_step(int no)
+int CameraManager::get_zoom_position_step(int no)
 {
     CameraDevicePtr camera = nullptr;
     if(!findTarget(no,camera,true))return -1;
     return camera->get_zoom_position_step();
 }
 
-int PyCrSDK::get_zoom_max_speed(int no)
+int CameraManager::get_zoom_max_speed(int no)
 {
     CameraDevicePtr camera = nullptr;
     if(!findTarget(no,camera,true)) return -1;
     return camera->get_zoom_max_speed();
 }
 
-int PyCrSDK::get_zoom_min_speed(int no)
+int CameraManager::get_zoom_min_speed(int no)
 {
     CameraDevicePtr camera = nullptr;
     if(!findTarget(no,camera,true))return -1;
     return camera->get_zoom_min_speed();
 }
 
-bool PyCrSDK::set_zoom_speed(int no, int speed)
+bool CameraManager::set_zoom_speed(int no, int speed)
 {
     CameraDevicePtr camera = nullptr;
     if(!findTarget(no,camera,true))return false;
     return camera->set_zoom_speed(speed);
 }
 
-bool PyCrSDK::get_live_view(int no, py::buffer py_buf)
+bool CameraManager::get_live_view(int no, py::buffer py_buf)
 {
     CameraDevicePtr camera = nullptr;
     if(!findTarget(no,camera,true))return false;
@@ -301,7 +301,7 @@ bool PyCrSDK::get_live_view(int no, py::buffer py_buf)
     return true;
 }
 
-bool PyCrSDK::download_latest_files(int no, int slot, int file_num, int mode)
+bool CameraManager::download_latest_files(int no, int slot, int file_num, int mode)
 {
     CameraDevicePtr camera = nullptr;
     if(!findTarget(no,camera,true))return false;
@@ -317,13 +317,13 @@ bool PyCrSDK::download_latest_files(int no, int slot, int file_num, int mode)
 
 // ----------------------------------------------------------------
 
-std::string PyCrSDK::get_connected_model() const
+std::string CameraManager::get_connected_model() const
 {
     return m_connected ? m_current_model : "";
 }
 // ----------------------------------------------------------------
 
-bool PyCrSDK::findTarget(int no, CameraDevicePtr& camera, bool check_connected)
+bool CameraManager::findTarget(int no, CameraDevicePtr& camera, bool check_connected)
 {
     bool findTarget = false;
     CameraDeviceList::const_iterator it = cameraList.begin();

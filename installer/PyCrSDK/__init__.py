@@ -1,4 +1,7 @@
 import os, sys, shutil
+from .pycrsdk import CameraManager
+
+__all__ = ["CameraManager"]
 
 def _install_dlls():
     src = os.path.join(os.path.dirname(__file__), "CrAdapter")

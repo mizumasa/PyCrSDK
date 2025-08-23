@@ -2,11 +2,17 @@ import io
 import cv2
 import numpy as np
 import sys
-sys.path.append("C:/masaru/CrSDK/PyCrSDK/build/Release")
-
-import pycrsdk
 import time
-cam = pycrsdk.PyCrSDK()
+
+try:
+    import PyCrSDK
+    cam = PyCrSDK.CameraManager()
+except ImportError:
+    print("Development environment detected.")
+    sys.path.append("C:/masaru/CrSDK/PyCrSDK/build/Release")
+    import pycrsdk
+    cam = pycrsdk.CameraManager()
+
 
 # 1) SDK初期化
 ok = cam.sdk_init()
@@ -67,8 +73,8 @@ else:
             img.show()
 
 
-        #success = cam.capture_image(0)
-        #print("Capture result:", success)
+        success = cam.capture_image(0)
+        print("Capture result:", success)
 
         # 5) 切断
         cam.disconnect_camera(0)
