@@ -19,8 +19,9 @@ PyCrSDK/
 
 1. Make library
 
-install Visual Studio（exam：VS2022） + CMake  
-git clone pybind11 (v3.0.1)
+* install Visual Studio（exam：VS2022）
+* install CMake    
+* git clone pybind11 (v3.0.1) in external folder
 
 ```
 >> cd PyCrSDK
