@@ -1,0 +1,7 @@
+installer/build
+installer/dist
+installer/PyCrSDK.egg-info
+installer/PyCrSDK/pycrsdk.cp311-win_amd64.pyd
+installer/PyCrSDK/pycrsdk.exp
+installer/PyCrSDK/pycrsdk.lib
+build/*
