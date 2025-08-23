@@ -1,0 +1,5 @@
+recursive-include PyCrSDK *.pyd
+recursive-include PyCrSDK *.dll
+recursive-include PyCrSDK CrAdapter/*.dll
+recursive-include PyCrSDK *.exp
+recursive-include PyCrSDK *.lib
