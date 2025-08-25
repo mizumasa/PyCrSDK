@@ -1,4 +1,4 @@
-# PyCrSDK for Touch Desigher
+# PyCrSDK for TouchDesigner
 
 # How to Install
 
