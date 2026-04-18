@@ -165,6 +165,7 @@ public:
     bool set_iso(int value);
     bool set_shutter_speed(int value);
     bool set_extended_shutter_speed(int value);
+    bool set_camera_eframing(bool on);
 
     void set_position_key_setting();
     void set_exposure_program_mode();

@@ -38,6 +38,7 @@ public:
     bool  set_iso(int no, int value);
     bool  set_shutter_speed(int no, int value);
     bool  set_extended_shutter_speed(int no, int value);
+    bool  set_camera_eframing(int no, bool on);
 
     int  get_zoom_current_position(int no);
     int  get_zoom_max_position(int no);

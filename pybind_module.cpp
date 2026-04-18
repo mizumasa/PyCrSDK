@@ -29,6 +29,7 @@ PYBIND11_MODULE(pycrsdk, m) {
         .def("set_iso", &CameraManager::set_iso, py::arg("no"),py::arg("value"))
         .def("set_shutter_speed", &CameraManager::set_shutter_speed, py::arg("no"),py::arg("value"))
         .def("set_extended_shutter_speed", &CameraManager::set_extended_shutter_speed, py::arg("no"),py::arg("value"))
+        .def("set_camera_eframing", &CameraManager::set_camera_eframing, py::arg("no"), py::arg("on"))
         .def("get_zoom_current_position", &CameraManager::get_zoom_current_position, py::arg("no"))
         .def("get_zoom_max_position", &CameraManager::get_zoom_max_position, py::arg("no"))
         .def("get_zoom_min_position", &CameraManager::get_zoom_min_position, py::arg("no"))

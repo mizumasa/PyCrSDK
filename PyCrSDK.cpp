@@ -244,6 +244,13 @@ bool CameraManager::set_extended_shutter_speed(int no, int value)
     return camera->set_extended_shutter_speed(value);
 }
 
+bool CameraManager::set_camera_eframing(int no, bool on)
+{
+    CameraDevicePtr camera = nullptr;
+    if(!findTarget(no,camera,true))return false;
+    return camera->set_camera_eframing(on);
+}
+
 int CameraManager::get_zoom_current_position(int no)
 {
     CameraDevicePtr camera = nullptr;

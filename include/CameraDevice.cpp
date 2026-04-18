@@ -1750,6 +1750,22 @@ bool CameraDevice::set_extended_shutter_speed(int selected_index)
     return true;
 }
 
+bool CameraDevice::set_camera_eframing(bool on)
+{
+    SDK::CrDeviceProperty prop;
+    prop.SetCode(SDK::CrDevicePropertyCode::CrDeviceProperty_CameraEframing);
+    prop.SetCurrentValue(on ? SDK::CrCameraEframing::CrCameraEframing_On
+                            : SDK::CrCameraEframing::CrCameraEframing_Off);
+    prop.SetValueType(SDK::CrDataType::CrDataType_UInt8Array);
+
+    auto err = SDK::SetDeviceProperty(m_device_handle, &prop);
+    if (CR_FAILED(err)) {
+        tout << "Camera Eframing setting FAILED\n";
+        return false;
+    }
+    return true;
+}
+
 void CameraDevice::set_position_key_setting()
 {
     if (1 != m_prop.position_key_setting.writable) {
