@@ -113,10 +113,8 @@ import pycrsdk
 You need to add path if you import module without pip install.
 
 ```
-pycrsdk.cp311-win_amd64.pyd
+python.exe
 CrAdapter
-Cr_Core.dll
-Cr_Core.lib
 ```
 
-You need to copy some DLLs.
+You need to copy the CrAdapter folder to the directory where python.exe exists.
