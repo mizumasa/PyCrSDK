@@ -101,3 +101,22 @@ removing build\bdist.win-amd64\wheel
 Successfully built pycrsdk-0.1.0-py3-none-any.whl
 
 ```
+
+# Developper Usage
+```
+import sys
+sys.path.append("D:/PyCrSDK/build/Release")
+
+import pycrsdk
+```
+
+You need to add path if you import module without pip install.
+
+```
+pycrsdk.cp311-win_amd64.pyd
+CrAdapter
+Cr_Core.dll
+Cr_Core.lib
+```
+
+You need to copy some DLLs.
