@@ -890,6 +890,42 @@ const std::unordered_map<CrInt32, std::string> map_CrDeviceProperty
 	{ SCRSDK::CrDeviceProperty_VideoStreamSettingVersion,"VideoStreamSettingVersion" },
 	{ SCRSDK::CrDeviceProperty_LiveViewProtocol,"LiveViewProtocol" },
 	{ SCRSDK::CrDeviceProperty_MovieRecReviewPlayingState,"MovieRecReviewPlayingState" },
+	{ SCRSDK::CrDeviceProperty_DispModeCandidateStill, "DispModeCandidateStill" },
+	{ SCRSDK::CrDeviceProperty_DispModeSettingStill, "DispModeSettingStill" },
+	{ SCRSDK::CrDeviceProperty_DispModeStill, "DispModeStill" },
+	{ SCRSDK::CrDeviceProperty_DispModeCandidateMovie, "DispModeCandidateMovie" },
+	{ SCRSDK::CrDeviceProperty_DispModeSettingMovie, "DispModeSettingMovie" },
+	{ SCRSDK::CrDeviceProperty_DispModeMovie, "DispModeMovie" },
+	{ SCRSDK::CrDeviceProperty_Movie_AngleOfViewPriority, "Movie_AngleOfViewPriority" },
+	{ SCRSDK::CrDeviceProperty_WindNoiseReductForExternalMic, "WindNoiseReductForExternalMic" },
+	{ SCRSDK::CrDeviceProperty_NoiseCutFilter, "NoiseCutFilter" },
+	{ SCRSDK::CrDeviceProperty_NoiseCutFilterForExternalMic, "NoiseCutFilterForExternalMic" },
+	{ SCRSDK::CrDeviceProperty_ControlGeneralSettingFileEnableStatus, "ControlGeneralSettingFileEnableStatus" },
+	{ SCRSDK::CrDeviceProperty_CompRAWShootingNR,"CompRAWShootingNR" },
+	{ SCRSDK::CrDeviceProperty_CompRAWShootingNRFileCompressionType,"CompRAWShootingNRFileCompressionType" },
+	{ SCRSDK::CrDeviceProperty_CompRAWShootingNRNumberOfSheets,"CompRAWShootingNRNumberOfSheets" },
+	{ SCRSDK::CrDeviceProperty_CompRAWShootingHDR,"CompRAWShootingHDR" },
+	{ SCRSDK::CrDeviceProperty_CompRAWShootingHDRFileCompressionType,"CompRAWShootingHDRFileCompressionType" },
+	{ SCRSDK::CrDeviceProperty_CompRAWShootingHDRNumberOfSheets,"CompRAWShootingHDRNumberOfSheets" },
+	{ SCRSDK::CrDeviceProperty_CompRAWShootingHDRDRSetting,"CompRAWShootingHDRDRSetting" },
+	{ SCRSDK::CrDeviceProperty_ElapsedBulbExposureTime,"ElapsedBulbExposureTime" },
+	{ SCRSDK::CrDeviceProperty_RemainingBulbExposureTime,"RemainingBulbExposureTime" },
+	{ SCRSDK::CrDeviceProperty_RemainingNoiseReductionTime,"RemainingNoiseReductionTime" },
+	{ SCRSDK::CrDeviceProperty_PeakingDisplay, "PeakingDisplay" },
+	{ SCRSDK::CrDeviceProperty_PeakingLevel, "PeakingLevel" },
+	{ SCRSDK::CrDeviceProperty_PeakingColor, "PeakingColor" },
+	{ SCRSDK::CrDeviceProperty_ZebraDisplay, "ZebraDisplay" },
+	{ SCRSDK::CrDeviceProperty_ZebraLevel, "ZebraLevel" },
+	{ SCRSDK::CrDeviceProperty_ZebraLevelTypeCustom, "ZebraLevelTypeCustom" },
+	{ SCRSDK::CrDeviceProperty_ZebraLevelStandardCustom, "ZebraLevelStandardCustom" },
+	{ SCRSDK::CrDeviceProperty_ZebraLevelRangeCustom, "ZebraLevelRangeCustom" },
+	{ SCRSDK::CrDeviceProperty_ZebraLevelLowerLimitCustom, "ZebraLevelLowerLimitCustom" },
+	{ SCRSDK::CrDeviceProperty_MarkerDisplay, "MarkerDisplay" },
+	{ SCRSDK::CrDeviceProperty_CenterMarkerDisplay, "CenterMarkerDisplay" },
+	{ SCRSDK::CrDeviceProperty_AspectMarkerRatioMovie, "AspectMarkerRatioMovie" },
+	{ SCRSDK::CrDeviceProperty_SafetyZoneDisplay, "SafetyZoneDisplay" },
+	{ SCRSDK::CrDeviceProperty_GuideframeDisplay, "GuideframeDisplay" },
+	{ SCRSDK::CrDeviceProperty_PullPostViewImageStatus, "PullPostViewImageStatus" },
 };
 
 std::string CrDevicePropertyString(SCRSDK::CrDevicePropertyCode code)
@@ -900,6 +936,92 @@ std::string CrDevicePropertyString(SCRSDK::CrDevicePropertyCode code)
 SCRSDK::CrDevicePropertyCode CrDevicePropertyCode(std::string name)
 {
 	return (SCRSDK::CrDevicePropertyCode)getMapCode(&map_CrDeviceProperty, name);
+}
+
+const std::unordered_map<CrInt32, std::string> map_CrControlCode
+{
+//	{ SCRSDK::CrControlCode_\1,"\1" },
+	{ SCRSDK::CrControlCode_Undefined, "Undefined" },
+	{ SCRSDK::CrControlCode_S1AndS2Button, "S1AndS2Button" },
+	{ SCRSDK::CrControlCode_Release, "Release" },
+	{ SCRSDK::CrControlCode_MovieRecButton, "MovieRecButton" },
+	{ SCRSDK::CrControlCode_MovieRecButtonToggle, "MovieRecButtonToggle" },
+	{ SCRSDK::CrControlCode_MovieRecButtonToggle2, "MovieRecButtonToggle2" },
+	{ SCRSDK::CrControlCode_SelectedMediaFormat, "SelectedMediaFormat" },
+	{ SCRSDK::CrControlCode_CancelMediaFormat, "CancelMediaFormat" },
+	{ SCRSDK::CrControlCode_RECSettingsReset, "RECSettingsReset" },
+	{ SCRSDK::CrControlCode_APS_C_or_Full_Switching, "APS_C_or_Full_Switching" },
+	{ SCRSDK::CrControlCode_CancelRemoteTouchOperation, "CancelRemoteTouchOperation" },
+	{ SCRSDK::CrControlCode_PixelMapping, "PixelMapping" },
+	{ SCRSDK::CrControlCode_TimeCodePresetReset, "TimeCodePresetReset" },
+	{ SCRSDK::CrControlCode_UserBitPresetReset, "UserBitPresetReset" },
+	{ SCRSDK::CrControlCode_SensorCleaning, "SensorCleaning" },
+	{ SCRSDK::CrControlCode_ResetPictureProfile, "ResetPictureProfile" },
+	{ SCRSDK::CrControlCode_ResetCreativeLook, "ResetCreativeLook" },
+	{ SCRSDK::CrControlCode_StreamButton, "StreamButton" },
+	{ SCRSDK::CrControlCode_FlickerScan, "FlickerScan" },
+	{ SCRSDK::CrControlCode_ContinuousShootingSpotBoostButton, "ContinuousShootingSpotBoostButton" },
+	{ SCRSDK::CrControlCode_TrackingOnAndAFOnButton, "TrackingOnAndAFOnButton" },
+	{ SCRSDK::CrControlCode_ForcedFileNumberReset, "ForcedFileNumberReset" },
+	{ SCRSDK::CrControlCode_CameraStandBy, "CameraStandBy" },
+	{ SCRSDK::CrControlCode_PowerOff, "PowerOff" },
+	{ SCRSDK::CrControlCode_PowerOn, "PowerOn" },
+	{ SCRSDK::CrControlCode_RemoteKeyUp, "RemoteKeyUp" },
+	{ SCRSDK::CrControlCode_RemoteKeyDown, "RemoteKeyDown" },
+	{ SCRSDK::CrControlCode_RemoteKeyLeft, "RemoteKeyLeft" },
+	{ SCRSDK::CrControlCode_RemoteKeyRight, "RemoteKeyRight" },
+	{ SCRSDK::CrControlCode_RemoteKeyCancelBackButton, "RemoteKeyCancelBackButton" },
+	{ SCRSDK::CrControlCode_RemoteKeyDisplayButton, "RemoteKeyDisplayButton" },
+	{ SCRSDK::CrControlCode_RemoteKeySet, "RemoteKeySet" },
+	{ SCRSDK::CrControlCode_RemoteKeyRightUp, "RemoteKeyRightUp" },
+	{ SCRSDK::CrControlCode_RemoteKeyRightDown, "RemoteKeyRightDown" },
+	{ SCRSDK::CrControlCode_RemoteKeyLeftUp, "RemoteKeyLeftUp" },
+	{ SCRSDK::CrControlCode_RemoteKeyLeftDown, "RemoteKeyLeftDown" },
+	{ SCRSDK::CrControlCode_RemoteKeyMenuButton, "RemoteKeyMenuButton" },
+	{ SCRSDK::CrControlCode_ResetMultiMatrix, "ResetMultiMatrix" },
+	{ SCRSDK::CrControlCode_CancelFocusPosition, "CancelFocusPosition" },
+	{ SCRSDK::CrControlCode_CancelZoomPosition, "CancelZoomPosition" },
+	{ SCRSDK::CrControlCode_CancelContentsTransfer, "CancelContentsTransfer" },
+	{ SCRSDK::CrControlCode_S1Button, "S1Button" },
+	{ SCRSDK::CrControlCode_S2Button, "S2Button" },
+	{ SCRSDK::CrControlCode_AELButton, "AELButton" },
+	{ SCRSDK::CrControlCode_FELButton, "FELButton" },
+	{ SCRSDK::CrControlCode_AWBLButton, "AWBLButton" },
+	{ SCRSDK::CrControlCode_NearFar, "NearFar" },
+	{ SCRSDK::CrControlCode_AFAreaPosition, "AFAreaPosition" },
+	{ SCRSDK::CrControlCode_ZoomOperation, "ZoomOperation" },
+	{ SCRSDK::CrControlCode_CustomWBCaptureStandby, "CustomWBCaptureStandby" },
+	{ SCRSDK::CrControlCode_CustomWBCaptureStandbyCancel, "CustomWBCaptureStandbyCancel" },
+	{ SCRSDK::CrControlCode_CustomWBCapture, "CustomWBCapture" },
+	{ SCRSDK::CrControlCode_HighResolutionShutterSpeedAdjust, "HighResolutionShutterSpeedAdjust" },
+	{ SCRSDK::CrControlCode_HighResolutionShutterSpeedAdjustInIntegralMultiples, "HighResolutionShutterSpeedAdjustInIntegralMultiples" },
+	{ SCRSDK::CrControlCode_FocusOperation, "FocusOperation" },
+	{ SCRSDK::CrControlCode_RemoteTouchOperation, "RemoteTouchOperation" },
+	{ SCRSDK::CrControlCode_SaveZoomAndFocusPosition, "SaveZoomAndFocusPosition" },
+	{ SCRSDK::CrControlCode_LoadZoomAndFocusPosition, "LoadZoomAndFocusPosition" },
+	{ SCRSDK::CrControlCode_ColorTemperatureStep, "ColorTemperatureStep" },
+	{ SCRSDK::CrControlCode_WhiteBalanceTintStep, "WhiteBalanceTintStep" },
+	{ SCRSDK::CrControlCode_SetPresetInfoZoomOnlyValue, "SetPresetInfoZoomOnlyValue" },
+	{ SCRSDK::CrControlCode_CameraButtonFunction, "CameraButtonFunction" },
+	{ SCRSDK::CrControlCode_CameraButtonFunctionMulti, "CameraButtonFunctionMulti" },
+	{ SCRSDK::CrControlCode_CameraDialFunction, "CameraDialFunction" },
+	{ SCRSDK::CrControlCode_CameraLeverFunction, "CameraLeverFunction" },
+	{ SCRSDK::CrControlCode_CreateNewFolder, "CreateNewFolder" },
+	{ SCRSDK::CrControlCode_ShutterECSNumberStep, "ShutterECSNumberStep" },
+	{ SCRSDK::CrControlCode_ZoomOperationWithInt16, "ZoomOperationWithInt16" },
+	{ SCRSDK::CrControlCode_FocusOperationWithInt16, "FocusOperationWithInt16" },
+	{ SCRSDK::CrControlCode_PresetPTZFRecall, "PresetPTZFRecall" },
+	{ SCRSDK::CrControlCode_USBConnectionModeRequest, "USBConnectionModeRequest" },
+};
+
+std::string CrControlCodeString(SCRSDK::CrControlCode code)
+{
+	return getMapString(&map_CrControlCode, (CrInt32)code);
+}
+
+SCRSDK::CrControlCode CrControlCode(std::string name)
+{
+	return (SCRSDK::CrControlCode)getMapCode(&map_CrControlCode, name);
 }
 
 const std::unordered_map<CrInt32, std::string> map_CrError
@@ -940,6 +1062,7 @@ const std::unordered_map<CrInt32, std::string> map_CrError
 	{ SCRSDK::CrError_File_SharingViolation,"File_SharingViolation" },
 	{ SCRSDK::CrError_File_Rotation,"File_Rotation" },
 	{ SCRSDK::CrError_File_SameNameFull,"File_SameNameFull" },
+//  { SCRSDK::CrError_File_CannotCreate,"File_CannotCreate" },
 	{ SCRSDK::CrError_Connect_Unknown,"Connect_Unknown" },
 	{ SCRSDK::CrError_Connect_Connect,"Connect_Connect" },
 	{ SCRSDK::CrError_Connect_ConnectIP,"Connect_ConnectIP" },
@@ -966,6 +1089,7 @@ const std::unordered_map<CrInt32, std::string> map_CrError
 	{ SCRSDK::CrError_Connect_SSH_PortForwardFailed,"Connect_SSH_PortForwardFailed" },
 	{ SCRSDK::CrError_Connect_SSH_GetFingerprintFailed,"Connect_SSH_GetFingerprintFailed" },
 	{ SCRSDK::CrError_Connect_RemoteTransfer_NotSupported,"Connect_RemoteTransfer_NotSupported" },
+//  { SCRSDK::CrError_Connect_InvalidCall,"Connect_InvalidCall" },
 	{ SCRSDK::CrError_Memory_Unknown,"Memory_Unknown" },
 	{ SCRSDK::CrError_Memory_OutOfMemory,"Memory_OutOfMemory" },
 	{ SCRSDK::CrError_Memory_InvalidPointer,"Memory_InvalidPointer" },
@@ -1002,6 +1126,7 @@ const std::unordered_map<CrInt32, std::string> map_CrError
 	{ SCRSDK::CrError_Adaptor_FeatureVersionInvalidValue,"Adaptor_FeatureVersionInvalidValue" },
 	{ SCRSDK::CrError_Adaptor_TemporaryStorageFull,"Adaptor_TemporaryStorageFull" },
 	{ SCRSDK::CrError_Adaptor_CameraStatusError,"Adaptor_CameraStatusError" },
+	{ SCRSDK::CrError_Adaptor_StoreFull,"Adaptor_StoreFull" },
 	{ SCRSDK::CrError_Device_Unknown,"Device_Unknown" },
 	{ SCRSDK::CrError_Contents_Unknown,"Contents_Unknown" },
 	{ SCRSDK::CrError_Contents_Reserved1,"Contents_Reserved1" },
@@ -1246,6 +1371,7 @@ const std::unordered_map<CrInt32, std::string> map_CrSdkApi
 	{ SCRSDK::CrSdkApi_Invalid,"Invalid" },
 	{ SCRSDK::CrSdkApi_SetDeviceProperty,"SetDeviceProperty" },
 	{ SCRSDK::CrSdkApi_SendCommand,"SendCommand" },
+	{ SCRSDK::CrSdkApi_ExecuteControlCode,"ExecuteControlCode" },
 };
 
 const std::unordered_map<CrInt32, std::string> map_CrWarningExt_OperationResultsParam
@@ -1255,15 +1381,7 @@ const std::unordered_map<CrInt32, std::string> map_CrWarningExt_OperationResults
 	{ SCRSDK::CrWarningExt_OperationResultsParam_NG,"NG" },
 	{ SCRSDK::CrWarningExt_OperationResultsParam_InvalidParameterError,"InvalidParameterError" },
 	{ SCRSDK::CrWarningExt_OperationResultsParam_CameraStatusError,"CameraStatusError" },
-	{ SCRSDK::CrWarningExt_OperationResultsParam_ExecuteCanceled,"ExecuteCanceled" },
 	{ SCRSDK::CrWarningExt_OperationResultsParam_CharacterSizeError,"CharacterSizeError" },
-	{ SCRSDK::CrWarningExt_OperationResultsParam_LowBrightnessError,"LowBrightnessError" },
-	{ SCRSDK::CrWarningExt_OperationResultsParam_TimeLimitExceededError,"TimeLimitExceededError" },
-	{ SCRSDK::CrWarningExt_OperationResultsParam_HighBrightnessError,"HighBrightnessError" },
-	{ SCRSDK::CrWarningExt_OperationResultsParam_ColorTempHighError,"ColorTempHighError" },
-	{ SCRSDK::CrWarningExt_OperationResultsParam_ColorTempLowError,"ColorTempLowError" },
-	{ SCRSDK::CrWarningExt_OperationResultsParam_TintOutOfRangeError,"TintOutOfRangeError" },
-	{ SCRSDK::CrWarningExt_OperationResultsParam_PoorWhiteAreaError,"PoorWhiteAreaError" },
 };
 
 const std::unordered_map<CrInt32, std::string> map_CrWarningExtParam_ControlPTZFResult
@@ -1358,6 +1476,26 @@ const std::unordered_map<CrInt32, std::string> map_CrWarningExtParam_UploadCusto
 	{ SCRSDK::CrWarningExtParam_UploadCustomGridLineFile_CameraStatusError, "UploadCustomGridLineFile_CameraStatusError"},
 };
 
+const std::unordered_map<CrInt32, std::string> map_CrWarningExt_ControlGeneralSettingFileResult
+{
+	{ SCRSDK::CrWarningExtParam_ControlGeneralSettingFile_Invalid,"ControlGeneralSettingFile_Invalid" },
+	{ SCRSDK::CrWarningExtParam_ControlGeneralSettingFile_OK,"ControlGeneralSettingFile_OK" },
+	{ SCRSDK::CrWarningExtParam_ControlGeneralSettingFile_NG_FileError,"ControlGeneralSettingFile_NG(FileError)" },
+	{ SCRSDK::CrWarningExtParam_ControlGeneralSettingFile_NG_StateError,"ControlGeneralSettingFile_NG(StateError)" },
+	{ SCRSDK::CrWarningExtParam_ControlGeneralSettingFile_NG_OtherError,"ControlGeneralSettingFile_NG(OtherError)" },
+	{ SCRSDK::CrWarningExtParam_ControlGeneralSettingFile_Canceled,"ControlGeneralSettingFile_Canceled" },
+	{ SCRSDK::CrWarningExtParam_ControlGeneralSettingFile_DeviceBusy,"ControlGeneralSettingFile_DeviceBusy"},
+	{ SCRSDK::CrWarningExtParam_ControlGeneralSettingFile_StoreFull,"ControlGeneralSettingFile_StoreFull"},
+	{ SCRSDK::CrWarningExtParam_ControlGeneralSettingFile_CantOpen,"ControlGeneralSettingFile_CantOpen"},
+	{ SCRSDK::CrWarningExtParam_ControlGeneralSettingFile_CantRead,"ControlGeneralSettingFile_CantRead"},
+};
+
+const std::unordered_map<CrInt32, std::string> map_CrGeneralSettingControlType
+{
+	{ SCRSDK::CrGeneralSettingControlType_CheckGeneralSettings,"Check General Settings" },
+	{ SCRSDK::CrGeneralSettingControlType_SetOfGeneralSettings,"Set of General Settings" },
+};
+
 static std::string func_OperationResults(CrInt32 param1, CrInt32 param2, CrInt32 param3)
 {
 	std::string str = "";
@@ -1365,6 +1503,7 @@ static std::string func_OperationResults(CrInt32 param1, CrInt32 param2, CrInt32
 
 	if(param1 == SCRSDK::CrSdkApi_SetDeviceProperty) str += getMapString(&map_CrDeviceProperty, param2) + ",";
 	else if(param1 == SCRSDK::CrSdkApi_SendCommand)	 str += getMapString(&map_CrCommandId, param2) + ",";
+	else if (param1 == SCRSDK::CrSdkApi_ExecuteControlCode)	 str += getMapString(&map_CrControlCode, param2) + ",";
 	else											 str += "unknown,";
 
 	str += getMapString(&map_CrWarningExt_OperationResultsParam, param3);
@@ -1391,26 +1530,44 @@ struct CrWarningExtString
 	const std::unordered_map<CrInt32, std::string>* param3;
 };
 
+const std::unordered_map<CrInt32, std::string> map_CrOperationCode
+{
+	{ SCRSDK::CrOperationCode_GetLicenseInfoList, "GetLicenseInfoList" },
+};
+
+std::string CrOperationCodeString(SCRSDK::CrOperationCode code)
+{
+	return getMapString(&map_CrOperationCode, (CrInt32)code);
+}
+
+SCRSDK::CrOperationCode CrOperationCode(std::string name)
+{
+	return (SCRSDK::CrOperationCode)getMapCode(&map_CrOperationCode, name);
+}
+
 const std::unordered_map<CrInt32, struct CrWarningExtString> map_CrWarningExt
 {
 													// str,						func, param1,param2,param3
 	{ SCRSDK::CrWarningExt_Unknown, 				{"Unknown", 				NULL, NULL, NULL, NULL }},
-	{ SCRSDK::CrWarningExt_AFStatus, 				{"AFStatus", 				NULL, &map_CrWarningExt_AFStatusParam, NULL, NULL }},
-	{ SCRSDK::CrWarningExt_OperationResults, 		{"OperationResults", 		func_OperationResults, NULL, NULL, NULL }},
-	{ SCRSDK::CrWarningExt_OperationInvalid, 		{"OperationInvalid", 		func_OperationResults, NULL, NULL, NULL }},
-	{ SCRSDK::CrWarningExt_ControlPTZFResult, 		{"ControlPTZFResult", 		NULL, &map_CrError, &map_CrWarningExtParam_ControlPTZFResult, &map_CrPTZFControlType}},
-	{ SCRSDK::CrWarningExt_PresetPTZFSet,     		{"PresetPTZFSet", 			NULL, &map_CrError, NULL, NULL }},
-	{ SCRSDK::CrWarningExt_PresetPTZFClear,			{"PresetPTZFClear", 		NULL, &map_CrError, NULL, NULL }},
-	{ SCRSDK::CrWarningExt_PresetPTZFEvent,			{"PresetPTZFEvent", 		NULL, &map_CrWarningExtParam_PresetPTZFEvent, NULL, NULL }},
-	{ SCRSDK::CrWarningExt_RequestTimeZoneSetting, 		{"RequestTimeZoneSetting", 		NULL, &map_CrError, NULL, NULL }},
-	{ SCRSDK::CrWarningExt_SetTimeZoneSetting, 		{"SetTimeZoneSetting", 		NULL, &map_CrError, NULL, NULL }},
-	{ SCRSDK::CrWarningExt_ExecuteEframing, 		{"ExecuteEframing", 		NULL, &map_CrError, NULL, NULL }},
-	{ SCRSDK::CrWarningExt_RequestStreamSettingList, 	{"RequestStreamSettingList",	NULL, &map_CrError, NULL, NULL }},
-	{ SCRSDK::CrWarningExt_SetStreamSettingList, 	{"SetStreamSettingList", 	NULL, &map_CrError, &map_CrWarningExtParam_SetStreamSetting, NULL }},
-	{ SCRSDK::CrWarningExt_DeleteContent,			{"DeleteContentResult",	func_DeleteContentResults, &map_CrWarningExtParam_DeleteContent, NULL, NULL }},
-	{ SCRSDK::CrWarningExt_UploadSceneFile,			{"UploadSceneFileResult",	NULL, &map_CrWarningExtParam_UploadSceneFile, NULL, NULL }},
-	{ SCRSDK::CrWarningExt_DownloadSceneFile,		{"DownloadSceneFileResult",	NULL, &map_CrWarningExtParam_DownloadSceneFile, NULL, NULL }},
+	{ SCRSDK::CrWarningExt_AFStatus, 				{"AFStatus", 				NULL, &map_CrWarningExt_AFStatusParam, NULL, NULL }},	// Status
+	{ SCRSDK::CrWarningExt_OperationResults, 		{"OperationResults", 		func_OperationResults, NULL, NULL, NULL }},	// SdkApi, DpCode/CmdCode, result
+	{ SCRSDK::CrWarningExt_OperationInvalid, 		{"OperationInvalid", 		func_OperationResults, NULL, NULL, NULL }},	// SdkApi, DpCode/CmdCode, result
+	{ SCRSDK::CrWarningExt_ControlPTZFResult, 		{"ControlPTZFResult", 		NULL, &map_CrError, &map_CrWarningExtParam_ControlPTZFResult, &map_CrPTZFControlType}},	// ResponceCode,Result,ControlType
+	{ SCRSDK::CrWarningExt_PresetPTZFSet,     		{"PresetPTZFSet", 			NULL, &map_CrError, NULL, NULL }},	// ResponceCode
+	{ SCRSDK::CrWarningExt_PresetPTZFClear,			{"PresetPTZFClear", 		NULL, &map_CrError, NULL, NULL }},	// ResponceCode
+	{ SCRSDK::CrWarningExt_PresetPTZFEvent,			{"PresetPTZFEvent", 		NULL, &map_CrWarningExtParam_PresetPTZFEvent, NULL, NULL }},	// Result
+	{ SCRSDK::CrWarningExt_RequestTimeZoneSetting, 		{"RequestTimeZoneSetting", 		NULL, &map_CrError, NULL, NULL }},	// ResponceCode
+	{ SCRSDK::CrWarningExt_SetTimeZoneSetting, 		{"SetTimeZoneSetting", 		NULL, &map_CrError, NULL, NULL }},	// ResponceCode
+	{ SCRSDK::CrWarningExt_ExecuteEframing, 		{"ExecuteEframing", 		NULL, &map_CrError, NULL, NULL }},	// ResponceCode
+	{ SCRSDK::CrWarningExt_RequestStreamSettingList, 	{"RequestStreamSettingList",	NULL, &map_CrError, NULL, NULL }},	// ResponceCode
+	{ SCRSDK::CrWarningExt_SetStreamSettingList, 	{"SetStreamSettingList", 	NULL, &map_CrError, &map_CrWarningExtParam_SetStreamSetting, NULL }},	// ResponceCode,Result
+	{ SCRSDK::CrWarningExt_DeleteContent,			{"DeleteContentResult",	func_DeleteContentResults, &map_CrWarningExtParam_DeleteContent, NULL, NULL }}, // ContentsId,SlotNumber
+	{ SCRSDK::CrWarningExt_UploadSceneFile,			{"UploadSceneFileResult",	NULL, &map_CrWarningExtParam_UploadSceneFile, NULL, NULL }},	// Result
+	{ SCRSDK::CrWarningExt_DownloadSceneFile,		{"DownloadSceneFileResult",	NULL, &map_CrWarningExtParam_DownloadSceneFile, NULL, NULL }},	// Result
 	{ SCRSDK::CrWarningExt_UploadCustomGridLineFile,	{"UploadCustomGridLineFileResult",	NULL, &map_CrWarningExtParam_UploadCustomGridLineFileResult, NULL, NULL }},
+	{ SCRSDK::CrWarningExt_ControlGeneralSettingFile, {"ControlGeneralSettingFile", NULL, &map_CrWarningExt_ControlGeneralSettingFileResult, &map_CrGeneralSettingControlType, NULL}},	// ResponceCode/Result,ControlType
+	{ SCRSDK::CrWarningExt_RequestControlGeneralSettingResultFile, {"RequestControlGeneralSettingResultFile", NULL, &map_CrError, &map_CrGeneralSettingControlType, NULL}},	// ResponceCode,ControlType
+	{ SCRSDK::CrWarningExt_RequestOperation, {"RequestOperation", NULL, &map_CrOperationCode, &map_CrError, NULL}},	// OperationCode,ResponceCode
 
 };
 
@@ -1433,4 +1590,49 @@ std::string CrWarningExtString(SCRSDK::CrError error, CrInt32 param1, CrInt32 pa
 		str += getMapString(iter->second.param3, param3) + ")";
 	}
 	return str;
+}
+
+const std::unordered_map<CrInt32, std::string> map_CrCameraDeviceModel
+{
+	{ SCRSDK::CrCameraDeviceModel_ILCE_7RM4,"ILCE-7RM4" },
+	{ SCRSDK::CrCameraDeviceModel_ILCE_9M2,"ILCE-9M2" },
+	{ SCRSDK::CrCameraDeviceModel_ILCE_7C,"ILCE-7C" },
+	{ SCRSDK::CrCameraDeviceModel_ILCE_7SM3,"ILCE-7SM3" },
+	{ SCRSDK::CrCameraDeviceModel_ILCE_1,"ILCE-1" },
+	{ SCRSDK::CrCameraDeviceModel_ILCE_7RM4A,"ILCE-7RM4A" },
+	{ SCRSDK::CrCameraDeviceModel_DSC_RX0M2,"DSC-RX0M2"},
+	{ SCRSDK::CrCameraDeviceModel_ILCE_7M4,"ILCE-7M4"},
+	{ SCRSDK::CrCameraDeviceModel_ILME_FX3,"ILME-FX3"},
+	{ SCRSDK::CrCameraDeviceModel_ILME_FX30,"ILME-FX30"},
+	{ SCRSDK::CrCameraDeviceModel_ILME_FX6,"ILME-FX6" },
+	{ SCRSDK::CrCameraDeviceModel_ILCE_7RM5,"ILCE-7RM5" },
+	{ SCRSDK::CrCameraDeviceModel_ZV_E1,"ZV-E1" },
+	{ SCRSDK::CrCameraDeviceModel_ILCE_6700,"ILCE-6700" },
+	{ SCRSDK::CrCameraDeviceModel_ILCE_7CM2,"ILCE-7CM2" },
+	{ SCRSDK::CrCameraDeviceModel_ILCE_7CR,"ILCE-7CR" },
+	{ SCRSDK::CrCameraDeviceModel_ILX_LR1,"ILX-LR1"},
+	{ SCRSDK::CrCameraDeviceModel_MPC_2610,"MPC-2610"},
+	{ SCRSDK::CrCameraDeviceModel_ILCE_9M3,"ILCE-9M3"},
+	{ SCRSDK::CrCameraDeviceModel_ZV_E10M2,"ZV-E10M2"},
+	{ SCRSDK::CrCameraDeviceModel_PXW_Z200,"PXW-Z200" },
+	{ SCRSDK::CrCameraDeviceModel_HXR_NX800,"HXR-NX800" },
+	{ SCRSDK::CrCameraDeviceModel_ILCE_1M2,"ILCE-1M2" },
+	{ SCRSDK::CrCameraDeviceModel_ILME_FX3A,"ILME-FX3A"},
+	{ SCRSDK::CrCameraDeviceModel_BRC_AM7,"BRC-AM7"},
+	{ SCRSDK::CrCameraDeviceModel_ILME_FR7,"ILME-FR7"},
+	{ SCRSDK::CrCameraDeviceModel_ILME_FX2,"ILME-FX2"},
+	{ SCRSDK::CrCameraDeviceModel_DSC_RX1RM3,"DSC-RX1RM3"},
+	{ SCRSDK::CrCameraDeviceModel_ILCE_7M5,"ILCE-7M5"},
+	{ SCRSDK::CrCameraDeviceModel_PXW_Z300,"PXW-Z300"},
+	{ SCRSDK::CrCameraDeviceModel_PXW_Z380,"PXW-Z380"},
+};
+
+std::string CrCameraDeviceModelString(CrInt32 id)
+{
+	return getMapString(&map_CrCameraDeviceModel, (CrInt32)id);
+}
+
+CrInt32 CrCameraDeviceModelIdCode(std::string name)
+{
+	return getMapCode(&map_CrCameraDeviceModel, name);
 }

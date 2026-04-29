@@ -119,7 +119,7 @@ namespace SCRSDK
 		CrError_Api_NotSupportModelOfUSB,
 		CrError_Api_NotSupportModelOfEthernet,
 		CrError_Api_InvalidSerialNumber,
-		CrError_Api_InvalidIpAddress,	
+		CrError_Api_InvalidIpAddress,
 		CrError_Api_InvalidMacAddress,
 		CrError_Api_PasswordLengthOverMax,
 		CrError_Api_PasswordIncludesInvalidCharacter,
@@ -141,13 +141,15 @@ namespace SCRSDK
 		CrError_Adaptor_Reset,
 		CrError_Adaptor_Read,
 		CrError_Adaptor_Phase,
-		CrError_Adaptor_DataToWiaItem,
+		CrError_Adaptor_DataToWiaItem, /* Do not use. Will be removed in the next release. */
+		CrError_Adaptor_Reserved1 = CrError_Adaptor_DataToWiaItem,
 		CrError_Adaptor_DeviceBusy,
 		CrError_Adaptor_Escape,
 		CrError_Adaptor_InvalidParameter,
 		CrError_Adaptor_FeatureVersionInvalidValue,
 		CrError_Adaptor_TemporaryStorageFull,
 		CrError_Adaptor_CameraStatusError,
+		CrError_Adaptor_StoreFull,
 
 		CrError_Device_Unknown						= CrError_Device,
 
@@ -399,6 +401,10 @@ namespace SCRSDK
 		CrWarningExt_UploadSceneFile,
 		CrWarningExt_DownloadSceneFile,
 		CrWarningExt_UploadCustomGridLineFile,
+		CrWarningExt_Resv,
+		CrWarningExt_ControlGeneralSettingFile,
+		CrWarningExt_RequestControlGeneralSettingResultFile,
+		CrWarningExt_RequestOperation,
 	};
 
 	enum CrWarningExt_AFStatusParam : CrInt32
@@ -512,6 +518,21 @@ namespace SCRSDK
 		CrWarningExtParam_UploadCustomGridLineFile_FeatureVersionInvalidValue,
 		CrWarningExtParam_UploadCustomGridLineFile_TemporaryStorageFull,
 		CrWarningExtParam_UploadCustomGridLineFile_CameraStatusError,
+	};
+
+	// ControlGeneralSettingFile
+	enum CrWarningExtParam_ControlGeneralSettingFileResult : CrInt32u
+	{
+		CrWarningExtParam_ControlGeneralSettingFile_Invalid = 0x00000000,
+		CrWarningExtParam_ControlGeneralSettingFile_OK,
+		CrWarningExtParam_ControlGeneralSettingFile_NG_FileError,
+		CrWarningExtParam_ControlGeneralSettingFile_NG_StateError,
+		CrWarningExtParam_ControlGeneralSettingFile_NG_OtherError,
+		CrWarningExtParam_ControlGeneralSettingFile_Canceled,
+		CrWarningExtParam_ControlGeneralSettingFile_DeviceBusy = 0x80000000,
+		CrWarningExtParam_ControlGeneralSettingFile_StoreFull,
+		CrWarningExtParam_ControlGeneralSettingFile_CantOpen,
+		CrWarningExtParam_ControlGeneralSettingFile_CantRead,
 	};
 
 	// for OnNotifyRemoteFirmwareUpdateResult()

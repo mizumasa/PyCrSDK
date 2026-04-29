@@ -39,6 +39,25 @@ public:
     bool  set_shutter_speed(int no, int value);
     bool  set_extended_shutter_speed(int no, int value);
     bool  set_camera_eframing(int no, bool on);
+    bool  execute_eframing(
+        int no,
+        int in_x, int in_y, int in_w, int in_h,
+        int out_x, int out_y, int out_w, int out_h,
+        int horizontal_denominator = 100,
+        int vertical_denominator = 100,
+        const std::string& eframing_type = "Single",
+        int area_no = 1,
+        int ptz_speed = -1
+    );
+    bool  update_eframing_area(
+        int no,
+        int area_no,
+        const std::string& group,
+        int dx,
+        int dy,
+        int dwidth,
+        int dheight
+    );
 
     int  get_zoom_current_position(int no);
     int  get_zoom_max_position(int no);

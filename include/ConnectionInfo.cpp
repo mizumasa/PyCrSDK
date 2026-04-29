@@ -1,7 +1,7 @@
 ﻿#include "ConnectionInfo.h"
 #include <cstddef>
 #include <cstring>
-#include "CRSDK/CameraRemote_SDK.h"
+#include "CameraRemote_SDK.h"
 #include "CameraDevice.h"
 
 namespace cli

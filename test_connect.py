@@ -10,7 +10,6 @@ try:
     cam = PyCrSDK.CameraManager()
 except ImportError:
     print("Development environment detected.")
-    sys.path.append("C:/masaru/CrSDK/PyCrSDK/build/Release")
     import pycrsdk
     cam = pycrsdk.CameraManager()
 

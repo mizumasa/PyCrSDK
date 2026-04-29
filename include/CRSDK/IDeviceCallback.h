@@ -2,6 +2,7 @@
 #define IDEVICECALLBACK_H
 
 #include	"CrDefines.h"
+#include	"CrOperationCode.h"
 
 namespace SCRSDK
 {
@@ -22,6 +23,8 @@ public:
 	virtual void OnLvPropertyChangedCodes(CrInt32u num, CrInt32u* codes) { }
 
 	virtual void OnCompleteDownload(CrChar* filename, CrInt32u type = 0xFFFFFFFF) { }
+
+	virtual void OnCompleteOperation(CrInt32u code, CrOperationResultData* resultData) { }
 
 	virtual void OnNotifyContentsTransfer(CrInt32u notify, CrContentHandle handle, CrChar* filename = 0) { }
 
@@ -46,6 +49,8 @@ public:
 	virtual void OnReceivePlaybackData(CrInt8u mediaType, CrInt32 dataSize, CrInt8u* data, CrInt64 pts, CrInt64 dts, CrInt32 param1, CrInt32 param2) { }
 
 	virtual void OnNotifyMonitorUpdated(CrInt32u type, CrInt32u frameNo) { }
+
+	virtual void OnNotifyPostViewImage(CrChar* filename, CrInt32u size) { }
 
 };
 

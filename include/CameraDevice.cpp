@@ -1766,6 +1766,26 @@ bool CameraDevice::set_camera_eframing(bool on)
     return true;
 }
 
+bool CameraDevice::set_eframing_speed_ptz(int speed)
+{
+    if (speed < 0 || speed > 255) {
+        tout << "Eframing PTZ speed is out of range (0-255)\n";
+        return false;
+    }
+
+    SDK::CrDeviceProperty prop;
+    prop.SetCode(SDK::CrDevicePropertyCode::CrDeviceProperty_EframingSpeedPTZ);
+    prop.SetCurrentValue(static_cast<CrInt64u>(speed));
+    prop.SetValueType(SDK::CrDataType::CrDataType_UInt8Array);
+
+    auto err = SDK::SetDeviceProperty(m_device_handle, &prop);
+    if (CR_FAILED(err)) {
+        tout << "Eframing PTZ speed setting FAILED\n";
+        return false;
+    }
+    return true;
+}
+
 void CameraDevice::set_position_key_setting()
 {
     if (1 != m_prop.position_key_setting.writable) {

@@ -24,12 +24,14 @@
 #endif
 
 #include "CrCommandData.h"
+#include "CrOperationCode.h"
 #include "CrDefines.h"
 #include "CrDeviceProperty.h"
 #include "CrError.h"
 #include "CrImageDataBlock.h"
 #include "CrTypes.h"
 #include "ICrCameraObjectInfo.h"
+#include "CrControlCode.h"
 
 namespace SCRSDK
 {
@@ -52,6 +54,7 @@ bool Release();
 extern "C"
 SCRSDK_API
 CrError EnumCameraObjects(ICrEnumCameraObjectInfo** ppEnumCameraObjectInfo, CrInt8u timeInSec = 3);
+
 
 extern "C"
 SCRSDK_API
@@ -78,7 +81,7 @@ CrError GetFingerprint(/*in*/ ICrCameraObjectInfo* pCameraObjectInfo, /*out*/ ch
 // This function connects the specified camera as Remote Connect Device.
 extern "C"
 SCRSDK_API
-CrError Connect(/*in*/ ICrCameraObjectInfo* pCameraObjectInfo, /*in*/  IDeviceCallback* callback, /*out*/ CrDeviceHandle* deviceHandle, /*in*/ CrSdkControlMode openMode = CrSdkControlMode_Remote, /*in*/ CrReconnectingSet reconnect = CrReconnecting_ON, const char* userId = 0, const char* userPassword = 0, const char* fingerprint = 0, CrInt32u fingerprintSize = 0);
+CrError Connect(/*in*/ ICrCameraObjectInfo* pCameraObjectInfo, /*in*/  IDeviceCallback* callback, /*out*/ CrDeviceHandle* deviceHandle, /*in*/ CrSdkControlMode openMode = CrSdkControlMode_Remote, /*in*/ CrReconnectingSet reconnect = CrReconnecting_ON, const char* userId = 0, const char* userPassword = 0, const char* fingerprint = 0, CrInt32u fingerprintSize = 0, const CrInt16u* pairingDisplayName = nullptr);
 
 // This function disconnects the connection device.
 extern "C"
@@ -458,6 +461,54 @@ CrError SetStreamSettingList(/*in*/ CrDeviceHandle deviceHandle, CrInt8u streamN
 extern "C"
 SCRSDK_API
 CrError UploadCustomGridLineFile(/*in*/ CrDeviceHandle deviceHandle, /*in*/ CrGridLineType gridLineType, /*in*/ CrChar* filePath, /*in*/ CrChar* displayName = 0);
+
+extern "C"
+SCRSDK_API
+CrError ControlGeneralSettingFile(/*in*/ CrDeviceHandle deviceHandle, /*in*/ CrGeneralSettingControlType controlType, /*in*/ CrChar* fileName);
+
+extern "C"
+SCRSDK_API
+CrError RequestControlGeneralSettingResultFile(/*in*/ CrDeviceHandle deviceHandle, /*in*/ CrGeneralSettingControlType controlType);
+
+extern "C"
+SCRSDK_API
+CrError GetControlGeneralSettingResultFile(/*in*/ CrDeviceHandle deviceHandle, /*out*/ CrInt8u* resultData, /*out*/ CrInt32u* resultDataSize);
+
+extern "C"
+SCRSDK_API
+CrError RequestOperation(/*in*/ CrDeviceHandle deviceHandle, /*in*/ CrOperationCode code, /*in*/ CrInt32u param1 = 0, /*in*/ CrInt32u param2 = 0, /*in*/ CrInt32u param3 = 0, /*in*/ CrInt32u param4 = 0, /*in*/ CrInt32u param5 = 0, /*in*/ void* pData = nullptr, /*in*/ CrInt32u dataSize = 0);
+
+extern "C"
+SCRSDK_API
+CrError ReleaseOperationResultObject(/*in*/ CrDeviceHandle deviceHandle, CrOperationResultData*& resultData);
+
+extern "C"
+SCRSDK_API
+CrError GetSelectControlCode(/*in*/ CrDeviceHandle deviceHandle, /*in*/ CrControlCode code, /*out*/ CrControlCodeInfo** info);
+
+extern "C"
+SCRSDK_API
+CrError GetSupportedControlCodes(/*in*/ CrDeviceHandle deviceHandle, /*out*/ CrControlCodeInfo** infos, /*out*/ CrInt32u* numOfInfos);
+
+extern "C"
+SCRSDK_API
+CrError ReleaseControlCodes(/*in*/ CrDeviceHandle deviceHandle, /*in*/ CrControlCodeInfo* list);
+
+extern "C"
+SCRSDK_API
+CrError ExecuteControlCodeValue(/*in*/ CrDeviceHandle deviceHandle, /*in*/ CrControlCode code, /*in*/ CrInt64u value);
+
+extern "C"
+SCRSDK_API
+CrError ExecuteControlCodeString(/*in*/ CrDeviceHandle deviceHandle, /*in*/ CrControlCode code, /*in*/ CrInt16u length, /*in*/ const CrInt16u* value);
+
+extern "C"
+SCRSDK_API
+CrError PullPostViewImage(CrDeviceHandle deviceHandle, /*ref*/ CrInt8u* buffer, CrInt32u bufferSize);
+
+extern "C"
+SCRSDK_API
+CrError GetCommandQueueCount(/*in*/ CrDeviceHandle deviceHandle, /*out*/ CrInt32u* queueCount);
 
 }
 #endif //CAMERAREMOTE_SDK_H

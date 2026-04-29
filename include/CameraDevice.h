@@ -166,6 +166,7 @@ public:
     bool set_shutter_speed(int value);
     bool set_extended_shutter_speed(int value);
     bool set_camera_eframing(bool on);
+    bool set_eframing_speed_ptz(int speed);
 
     void set_position_key_setting();
     void set_exposure_program_mode();
@@ -250,6 +251,7 @@ public:
     void set_zoom_position_setting();
 
     std::int32_t get_number() { return m_number; }
+    SCRSDK::CrDeviceHandle get_device_handle() const { return static_cast<SCRSDK::CrDeviceHandle>(m_device_handle); }
     text get_model() { return text(m_info->GetModel()); }
     text get_id();
 

@@ -31,6 +31,8 @@ public:
 	~CrImageInfo();
 
 	CrInt32u GetBufferSize()const;
+	CrInt32u GetWidth()const;
+	CrInt32u GetHeight()const;
 
 private:
 	CrInt32u width;

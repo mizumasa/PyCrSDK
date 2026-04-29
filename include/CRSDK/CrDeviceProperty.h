@@ -2,6 +2,7 @@
 #define CRDEVICEPROPERTY_H
 
 #include <unordered_map>
+#include <vector>
 #include "CrDefines.h"
 
 #if defined(_MSC_VER)
@@ -611,6 +612,35 @@ enum CrDevicePropertyCode : CrInt32u
 	CrDeviceProperty_HighResolutionShutterSpeedAdjust,
 	CrDeviceProperty_HighResolutionShutterSpeedAdjustInIntegralMultiples,
 	CrDeviceProperty_TopOfTheGroupShootingMarkSetting,
+	CrDeviceProperty_CompRAWShootingNR,
+	CrDeviceProperty_CompRAWShootingNRFileCompressionType,
+	CrDeviceProperty_CompRAWShootingNRNumberOfSheets,
+	CrDeviceProperty_CompRAWShootingHDR,
+	CrDeviceProperty_CompRAWShootingHDRFileCompressionType,
+	CrDeviceProperty_CompRAWShootingHDRNumberOfSheets,
+	CrDeviceProperty_CompRAWShootingHDRDRSetting,
+	CrDeviceProperty_DispModeSettingStill,
+	CrDeviceProperty_DispModeStill,
+	CrDeviceProperty_DispModeSettingMovie,
+	CrDeviceProperty_DispModeMovie,
+	CrDeviceProperty_PeakingDisplay,
+	CrDeviceProperty_PeakingLevel,
+	CrDeviceProperty_PeakingColor,
+	CrDeviceProperty_ZebraDisplay,
+	CrDeviceProperty_ZebraLevel,
+	CrDeviceProperty_ZebraLevelTypeCustom,
+	CrDeviceProperty_ZebraLevelStandardCustom,
+	CrDeviceProperty_ZebraLevelRangeCustom,
+	CrDeviceProperty_ZebraLevelLowerLimitCustom,
+	CrDeviceProperty_MarkerDisplay,
+	CrDeviceProperty_CenterMarkerDisplay,
+	CrDeviceProperty_AspectMarkerRatioMovie,
+	CrDeviceProperty_SafetyZoneDisplay,
+	CrDeviceProperty_GuideframeDisplay,
+	CrDeviceProperty_Movie_AngleOfViewPriority,
+	CrDeviceProperty_WindNoiseReductForExternalMic,
+	CrDeviceProperty_NoiseCutFilter,
+	CrDeviceProperty_NoiseCutFilterForExternalMic,
 
 	CrDeviceProperty_S2 = 0x0500,
 	CrDeviceProperty_reserved10,
@@ -854,6 +884,14 @@ enum CrDevicePropertyCode : CrInt32u
 	CrDeviceProperty_SceneFileDownloadOperationEnableStatus,
 	CrDeviceProperty_SceneFileIndexesAvailableForDownload,
 	CrDeviceProperty_CustomGridLineFileCommandVersion,
+
+	CrDeviceProperty_ElapsedBulbExposureTime,
+	CrDeviceProperty_RemainingBulbExposureTime,
+	CrDeviceProperty_RemainingNoiseReductionTime,
+	CrDeviceProperty_DispModeCandidateStill,
+	CrDeviceProperty_DispModeCandidateMovie,
+	CrDeviceProperty_ControlGeneralSettingFileEnableStatus,
+	CrDeviceProperty_PullPostViewImageStatus,
 
 	CrDeviceProperty_MaxVal	= 0x1000,
 };
@@ -1875,6 +1913,7 @@ enum CrRemoconZoomSpeedType : CrInt8u
 };
 
 // RAW File Type
+// CompRAW Shooting NR RAW File Type
 enum CrRAWFileCompressionType : CrInt16u
 {
 	CrRAWFile_Uncompression = 0x0000,
@@ -1883,6 +1922,7 @@ enum CrRAWFileCompressionType : CrInt16u
 	CrRAWFile_LossLessS,
 	CrRAWFile_LossLessM,
 	CrRAWFile_LossLessL,
+	CrRAWFile_Compressed_HQ,
 };
 
 enum CrContentsTransferStatus : CrInt16u
@@ -2001,6 +2041,7 @@ enum CrDispMode : CrInt8u
 	CrDispMode_Level,
 	CrDispMode_ForViewFinder,
 	CrDispMode_MonitorOff,
+	CrDispMode_HistogramAndLevel,
 };
 
 // Disp Mode Bit Num
@@ -2015,6 +2056,7 @@ enum CrDispModeBitNum : CrInt32u
 	CrDispModeBitNum_NoDispInfoExposureTimeOut = 0x00000040,
 	CrDispModeBitNum_ForViewFinder = 0x00000080,
 	CrDispModeBitNum_MonitorOff = 0x00000100,
+	CrDispModeBitNum_HistogramAndLevel = 0x00000200,
 };
 
 // Gain Base Sensitivity
@@ -3059,6 +3101,9 @@ enum CrUSBPowerSupply : CrInt8u
 {
 	CrUSBPowerSupply_Off = 0x01,
 	CrUSBPowerSupply_On,
+	CrUSBPowerSupply_Auto,
+	CrUSBPowerSupply_Port1,
+	CrUSBPowerSupply_Port2,
 };
 
 // Long Exposure NR
@@ -4546,6 +4591,8 @@ enum CrMonitoringFormat_DeliveryImageQualityLevel : CrInt8u
 	CrMonitoringFormat_DeliveryImageQualityLevel_Level1,
 	CrMonitoringFormat_DeliveryImageQualityLevel_Level2,
 	CrMonitoringFormat_DeliveryImageQualityLevel_Level3,
+	CrMonitoringFormat_DeliveryImageQualityLevel_Level4,
+	CrMonitoringFormat_DeliveryImageQualityLevel_Level5,
 };
 
 // Monitoring Available Format[bit8-15] : VideoCodec
@@ -4570,6 +4617,10 @@ enum CrMonitoringFormat_Resolution : CrInt8u
 	CrMonitoringFormat_Resolution_1920x1080,
 	CrMonitoringFormat_Resolution_640x480,
 	CrMonitoringFormat_Resolution_1024x768,
+	CrMonitoringFormat_Resolution_320x240,
+	CrMonitoringFormat_Resolution_320x216,
+	CrMonitoringFormat_Resolution_320x184,
+	CrMonitoringFormat_Resolution_320x168,
 };
 
 // Monitoring Available Format[bit24-31] : FrameRate
@@ -4584,16 +4635,17 @@ enum CrMonitoringFormat_FrameRate : CrInt8u
 	CrMonitoringFormat_FrameRate_30_00fps,
 };
 
-// Monitoring Available Format[bit32-47] : BitRate
-// Monitoring Format Support Information[bit32-47] : BitRate
+// Monitoring Available Format[bit32-46] : BitRate
+// Monitoring Format Support Information[bit32-46] : BitRate
 // 100 times the real value
-// e.g.) 0x0064(1Mbps)
+// e.g.) 0x0032(0.5Mbps)
+//       0x0064(1Mbps)
 //       0x00C8(2Mbps)
 //       0x0320(8Mbps)
 //       0x0960(24Mbps)
 
-// Monitoring Available Format[bit48] : Resolution Variable Flag
-// Monitoring Format Support Information[bit48] : Resolution Variable Flag
+// Monitoring Available Format[bit47] : Resolution Variable Flag
+// Monitoring Format Support Information[bit47] : Resolution Variable Flag
 // 0b0	Not Variable
 // 0b1	Variable
 
@@ -4608,9 +4660,9 @@ union CrMonitoringFormat
 		CrMonitoringFormat_VideoCodec videoCodec;
 		CrMonitoringFormat_Resolution resolution;
 		CrMonitoringFormat_FrameRate frameRate;
-		CrInt16u bitRate; // 100 times the real value
-		CrInt8u resolutionVariableFlag : 1;
-		CrInt8u reserve1 : 7;
+		CrInt16u bitRate : 15; // 100 times the real value
+		CrInt16u resolutionVariableFlag : 1;
+		CrInt8u reserve1;
 		CrInt8u reserve2;
 	} member;
 };
@@ -4856,7 +4908,7 @@ enum CrShutterSelectMode : CrInt8u
 // Upload Partial Data Type
 enum CrUploadPartialDataType : CrInt32u
 {
-	CrUploadPartialDataType_FirmwareData       = 0x00050001,
+	CrUploadPartialDataType_FirmwareData = 0x00050001,
 };
 
 // Debug Mode
@@ -5557,11 +5609,180 @@ enum CrTopOfTheGroupShootingMarkSetting : CrInt16u
 	CrTopOfTheGroupShootingMarkSetting_DividerFrame = 0x0101,
 };
 
+// CompRAW Shooting NR Mode
+// CompRAW Shooting HDR Mode
+enum CrCompRAWShootingMode : CrInt8u
+{
+	CrCompRAWShooting_Off = 0x01,
+	CrCompRAWShooting_On,
+};
+
+// CompRAW shooting HDR DR Setting
+enum CrCompRAWShootingHDRDRSetting : CrInt8u
+{
+	CrCompRAWShootingHDRDRSetting_Level1 = 0x01,
+	CrCompRAWShootingHDRDRSetting_Level2,
+	CrCompRAWShootingHDRDRSetting_Level3,
+	CrCompRAWShootingHDRDRSetting_AUTO   = 0x80,
+};
+
+// CompRAW Shooting NR File Compression Type
+// CompRAW Shooting HDR File Compression Type
+// refs. CrRAWFileCompressionType
+
+// CompRAW Shooting NR Number of Sheets
+// CompRAW Shooting HDR File Compression Type
+// e.g.) 0x0004 = 4 sheets
+enum CrCompRAWShootingNumberOfSheets : CrInt16u
+{
+	CrCompRAWShootingNumberOfSheets_Invalid = 0x0000,
+};
+
 // Movie Rec Review Playing State
 enum CrMovieRecReviewPlayingState : CrInt8u
 {
 	CrMovieRecReviewPlayingState_NotPlaying = 0x00,
 	CrMovieRecReviewPlayingState_Playing
+};
+
+// Wind Noise Reduct for External Mic.
+enum CrWindNoiseReductForExternalMic : CrInt8u
+{
+	CrWindNoiseReductForExternalMic_OFF = 0x01,
+	CrWindNoiseReductForExternalMic_ON,
+};
+
+// Noise Cut Filter
+enum CrNoiseCutFilter : CrInt8u
+{
+	CrNoiseCutFilter_OFF = 0x01,
+	CrNoiseCutFilter_ON,
+};
+
+// Noise Cut Filter for External Mic.
+enum CrNoiseCutFilterForExternalMic : CrInt8u
+{
+	CrNoiseCutFilterForExternalMic_OFF = 0x01,
+	CrNoiseCutFilterForExternalMic_ON,
+};
+
+// Angle of view Priority (Movie)
+enum CrMovieAngleOfViewPriority : CrInt8u
+{
+	CrMovie_AngleOfViewPriority_OFF = 0x01,
+	CrMovie_AngleOfViewPriority_ON,
+};
+
+// Control General SettingFile Enable Status
+enum CrControlGeneralSettingFileEnableStatus : CrInt8u
+{
+	CrControlGeneralSettingFileEnableStatus_Disable = 0x00,
+	CrControlGeneralSettingFileEnableStatus_Enable,
+};
+
+// Peaking Display
+enum CrPeakingDisplay : CrInt8u
+{
+	CrPeakingDisplay_Off = 0x01,
+	CrPeakingDisplay_On,
+};
+
+// Peaking Level
+enum CrPeakingLevel : CrInt8u
+{
+	CrPeakingLevel_Low = 0x01,
+	CrPeakingLevel_Mid,
+	CrPeakingLevel_High,
+};
+
+// Peaking Color
+enum CrPeakingColor : CrInt8u
+{
+	CrPeakingColor_White = 0x01,
+	CrPeakingColor_Blue,
+	CrPeakingColor_Yellow,
+	CrPeakingColor_Red,
+};
+
+// Zebra Display
+enum CrZebraDisplay : CrInt8u
+{
+	CrZebraDisplay_Off = 0x01,
+	CrZebraDisplay_On,
+};
+
+// Zebra Level
+//   offset 0x1000 Lower Limit
+//   offset 0x8000 Custom
+//   e.g. 0x0046 = 70
+//   e.g. 0x1064 = 100+
+//   e.g. 0x8001 = Custom1
+enum CrZebraLevel : CrInt16u
+{
+	CrZebraLevel_LowerLimitOffset = 0x1000,
+	CrZebraLevel_CustomOffset = 0x8000,
+};
+
+// Zebra Level Type (Custom)
+enum CrZebraLevelTypeCustom : CrInt8u
+{
+	CrZebraLevelTypeCustom_StdAndRange = 0x01,
+	CrZebraLevelTypeCustom_LowerLimit,
+};
+
+// Marker Display
+enum CrMarkerDisplay : CrInt8u
+{
+	CrMarkerDisplay_Off = 0x01,
+	CrMarkerDisplay_On,
+};
+
+// Center Marker Display
+enum CrCenterMarkerDisplay : CrInt8u
+{
+	CrCenterMarkerDisplay_Off = 0x01,
+	CrCenterMarkerDisplay_On,
+};
+
+// Aspect Marker Ratio (Movie)
+enum CrAspectMarkerRatioMovie : CrInt8u
+{
+	CrAspectMarkerRatioMovie_Off = 0x01,
+	CrAspectMarkerRatioMovie_9x16,
+	CrAspectMarkerRatioMovie_4x5,
+	CrAspectMarkerRatioMovie_1x1,
+	CrAspectMarkerRatioMovie_4x3,
+	CrAspectMarkerRatioMovie_13x9,
+	CrAspectMarkerRatioMovie_14x9,
+	CrAspectMarkerRatioMovie_15x9,
+	CrAspectMarkerRatioMovie_16x9,
+	CrAspectMarkerRatioMovie_17x9,
+	CrAspectMarkerRatioMovie_1_66x1, // 1.66:1
+	CrAspectMarkerRatioMovie_1_85x1, // 1.85:1
+	CrAspectMarkerRatioMovie_1_91x1, // 1.91:1
+	CrAspectMarkerRatioMovie_2x1,
+	CrAspectMarkerRatioMovie_2_35x1, // 2.35:1
+	CrAspectMarkerRatioMovie_2_39x1, // 2.39:1
+};
+
+// Safety Zone Display
+enum CrSafetyZoneDisplay : CrInt8u
+{
+	CrSafetyZoneDisplay_Off = 0xFF,
+};
+
+// Guideframe Display
+enum CrGuideframeDisplay : CrInt8u
+{
+	CrGuideframeDisplay_Off = 0x01,
+	CrGuideframeDisplay_On,
+};
+
+// Pull PostView Image Status
+enum CrPullPostViewImageStatus : CrInt32u
+{
+	CrPullPostViewImageStatus_NotExists = 0x00000000,
+	CrPullPostViewImageStatus_Exists = 0x00000001,
 };
 
 extern "C"
@@ -5698,9 +5919,9 @@ public:
 	CrInt32u GetTimeCode()const;
 
 private:
-        CrInt32u code;
+		CrInt32u code;
 		CrPropertyEnableFlag enableFlag;
-        CrFrameInfoType valueType;
+		CrFrameInfoType valueType;
 		CrInt32u valueSize;
 		CrInt8u* value;
 		CrInt32u timeCode; // SMPTE 12M time-code from monitoring meta.

@@ -54,8 +54,9 @@ namespace SCRSDK
 		CrDataType_Int32Range	= CrDataType_RangeBit | CrDataType_Int32,
 		CrDataType_Int64Range	= CrDataType_RangeBit | CrDataType_Int64,
 		CrDataType_Int128Range	= CrDataType_RangeBit | CrDataType_Int128,
-        CrDataType_STR          = 0xFFFF,
-
+		CrDataType_STR          = 0xFFFF,
+		CrDataType_CustomBit    = 0x10000,
+		CrDataType_Button       = CrDataType_CustomBit | CrDataType_UInt16Array,
 	};
 	
 	#define CrChanged 0x0001
@@ -80,6 +81,7 @@ namespace SCRSDK
 		Setting_Key_PartialBuffer = 6,
 		Setting_Key_GetOSDImage_IntervalTime = 8,
 		Setting_Key_EnablePostView = 9,
+		Setting_Key_PostViewTransferringType = 10,
 	}SettingKey;
 
 	typedef enum
@@ -123,6 +125,10 @@ namespace SCRSDK
 		CrCameraDeviceModel_BRC_AM7,
 		CrCameraDeviceModel_ILME_FR7,
 		CrCameraDeviceModel_ILME_FX2,
+		CrCameraDeviceModel_DSC_RX1RM3,
+		CrCameraDeviceModel_ILCE_7M5,
+		CrCameraDeviceModel_PXW_Z300,
+		CrCameraDeviceModel_PXW_Z380,
 	};
 
 	enum CrReconnectingSet : CrInt32u
@@ -169,6 +175,7 @@ namespace SCRSDK
 		CrSdkApi_Invalid,
 		CrSdkApi_SetDeviceProperty,
 		CrSdkApi_SendCommand,
+		CrSdkApi_ExecuteControlCode = 0x9207, // CrSdkApi_ExecuteControlCodeValue/CrSdkApi_ExecuteControlCodeString
 	};
 
 	/* Replaced with the following enum.
@@ -208,14 +215,29 @@ namespace SCRSDK
 		CrMoviePlaybackDataType_Audio,
 	};
 
+	enum CrGeneralSettingControlType : CrInt32u
+	{
+		CrGeneralSettingControlType_CheckGeneralSettings = 0x00000001,
+		CrGeneralSettingControlType_SetOfGeneralSettings = 0x00000002,
+	};
+
 	enum CrMonitorUpdatedNotify : CrInt32u
 	{
 		CrMonitorUpdated_LiveView,
 		CrMonitorUpdated_OSD,
 	};
 
+	enum CrPostViewTransferringType : CrInt32u
+	{
+		CrPostViewTransferring_Legacy          = 0x00000000, // Output to File. Callback to notify : OnCompleteDownload
+		CrPostViewTransferring_UserSelect_File = 0x00008000, // Output to File. Callback to notify : OnNotifyPostViewImage
+		CrPostViewTransferring_UserSelect_RAM  = 0x00008001, // Transfer via RAM. Callback to notify : OnNotifyPostViewImage
+	};
+
 	static const CrInt32u CrREMOTETRANSFER_PARTIAL_FILE_SIZE_MIN = 0x00000001; // 1B;
 	static const CrInt32u CrREMOTETRANSFER_PARTIAL_FILE_SIZE_MAX = 0x7FFFFFFF; // 2GB - 1;
+
+	static const CrInt32u CrGENERALSETTING_FILE_SIZE_MAX = (1024 * 1024 * 2);  // 2MB
 
 }
 

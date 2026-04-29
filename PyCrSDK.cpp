@@ -3,6 +3,31 @@
 
 namespace SDK = SCRSDK;
 
+namespace {
+SDK::CrEframingType parse_eframing_type(const std::string& type_name)
+{
+    if (type_name == "None") {
+        return SDK::CrEframingType_None;
+    }
+    if (type_name == "Auto") {
+        return SDK::CrEframingType_Auto;
+    }
+    if (type_name == "Single") {
+        return SDK::CrEframingType_Single;
+    }
+    if (type_name == "PTZ") {
+        return SDK::CrEframingType_PTZ;
+    }
+    if (type_name == "HoldCurrentPosition") {
+        return SDK::CrEframingType_HoldCurrentPosition;
+    }
+    if (type_name == "ForceZoomOut") {
+        return SDK::CrEframingType_ForceZoomOut;
+    }
+    return SDK::CrEframingType_Single;
+}
+} // namespace
+
 // ----------------------------------------------------------------
 CameraManager::CameraManager() = default;
 CameraManager::~CameraManager() { if (m_sdk_inited) sdk_release(); }
@@ -249,6 +274,103 @@ bool CameraManager::set_camera_eframing(int no, bool on)
     CameraDevicePtr camera = nullptr;
     if(!findTarget(no,camera,true))return false;
     return camera->set_camera_eframing(on);
+}
+
+bool CameraManager::execute_eframing(
+    int no,
+    int in_x, int in_y, int in_w, int in_h,
+    int out_x, int out_y, int out_w, int out_h,
+    int horizontal_denominator,
+    int vertical_denominator,
+    const std::string& eframing_type,
+    int area_no,
+    int ptz_speed)
+{
+    CameraDevicePtr camera = nullptr;
+    if (!findTarget(no, camera, true)) return false;
+    if (horizontal_denominator <= 0 || vertical_denominator <= 0) {
+        std::cerr << "[PyCrSDK] denominator must be > 0\n";
+        return false;
+    }
+    if (area_no < static_cast<int>(SDK::CrEframingArea1) || area_no > static_cast<int>(SDK::CrEframingArea4)) {
+        std::cerr << "[PyCrSDK] area_no must be 1..4\n";
+        return false;
+    }
+
+    SDK::CrEframingInfo info;
+    info.horizontal_denominator = horizontal_denominator * 1024;
+    info.vertical_denominator = vertical_denominator * 1024;
+    info.eframingType = parse_eframing_type(eframing_type);
+
+    SDK::CrEframingRectangle in_rect;
+    in_rect.x = in_x * 1024;
+    in_rect.y = in_y * 1024;
+    in_rect.width = in_w * 1024;
+    in_rect.height = in_h * 1024;
+
+    SDK::CrEframingRectangle out_rect;
+    out_rect.x = out_x * 1024;
+    out_rect.y = out_y * 1024;
+    out_rect.width = out_w * 1024;
+    out_rect.height = out_h * 1024;
+
+    info.addInputInfo(static_cast<SDK::CrEframingAreaNumber>(area_no), in_rect);
+    info.addOutputInfo(static_cast<SDK::CrEframingAreaNumber>(area_no), out_rect);
+
+    if (info.eframingType == SDK::CrEframingType_PTZ && ptz_speed >= 0) {
+        if (!camera->set_eframing_speed_ptz(ptz_speed)) {
+            return false;
+        }
+    }
+
+    auto err = SDK::ExecuteEframing(camera->get_device_handle(), &info);
+    if (CR_FAILED(err)) {
+        std::cerr << "[PyCrSDK] ExecuteEframing failed: 0x" << std::hex << err << std::dec << "\n";
+        return false;
+    }
+    return true;
+}
+
+bool CameraManager::update_eframing_area(
+    int no,
+    int area_no,
+    const std::string& group,
+    int dx,
+    int dy,
+    int dwidth,
+    int dheight)
+{
+    CameraDevicePtr camera = nullptr;
+    if (!findTarget(no, camera, true)) return false;
+    if (area_no < static_cast<int>(SDK::CrEframingArea1) || area_no > static_cast<int>(SDK::CrEframingArea4)) {
+        std::cerr << "[PyCrSDK] area_no must be 1..4\n";
+        return false;
+    }
+
+    SDK::CrEframingAreaGroup area_group = SDK::CrEframingInputArea;
+    if (group == "in" || group == "input") {
+        area_group = SDK::CrEframingInputArea;
+    } else if (group == "out" || group == "output") {
+        area_group = SDK::CrEframingOutputArea;
+    } else {
+        std::cerr << "[PyCrSDK] group must be 'in'/'input' or 'out'/'output'\n";
+        return false;
+    }
+
+    auto err = SDK::UpdateEframingArea(
+        camera->get_device_handle(),
+        static_cast<SDK::CrEframingAreaNumber>(area_no),
+        area_group,
+        static_cast<CrInt16>(dx * 1024),
+        static_cast<CrInt16>(dy * 1024),
+        static_cast<CrInt16>(dwidth * 1024),
+        static_cast<CrInt16>(dheight * 1024)
+    );
+    if (CR_FAILED(err)) {
+        std::cerr << "[PyCrSDK] UpdateEframingArea failed: 0x" << std::hex << err << std::dec << "\n";
+        return false;
+    }
+    return true;
 }
 
 int CameraManager::get_zoom_current_position(int no)

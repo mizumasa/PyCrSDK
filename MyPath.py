@@ -1,2 +1,2 @@
 import sys
-sys.path.append("D:/PyCrSDK/build/Release")
+sys.path.append("D:/PyCrSDK2/build/Release")

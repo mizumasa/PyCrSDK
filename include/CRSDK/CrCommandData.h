@@ -3,6 +3,7 @@
 
 #include "CrTypes.h"
 
+
 namespace SCRSDK
 {
 enum CrCommandId
@@ -56,6 +57,8 @@ enum CrCommandParam : CrInt16u
 	CrCommandParam_Up = 0x0000,
 	CrCommandParam_Down = 0x0001,
 };
+
+
 }
 
 #endif // CRCOMMANDDATA_H

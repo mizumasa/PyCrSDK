@@ -1,5 +1,5 @@
-﻿#include "CRSDK/CrImageDataBlock.h"
-#include "CRSDK/CrTypes.h"
+﻿#include "CrImageDataBlock.h"
+#include "CrTypes.h"
 #include "OpenCVWrapper.h"
 #include <vector>
 #include <opencv2/opencv.hpp>
