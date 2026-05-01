@@ -30,6 +30,20 @@ PYBIND11_MODULE(pycrsdk, m) {
         .def("set_shutter_speed", &CameraManager::set_shutter_speed, py::arg("no"),py::arg("value"))
         .def("set_extended_shutter_speed", &CameraManager::set_extended_shutter_speed, py::arg("no"),py::arg("value"))
         .def("set_camera_eframing", &CameraManager::set_camera_eframing, py::arg("no"), py::arg("on"))
+        .def("execute_eframing", &CameraManager::execute_eframing,
+            py::arg("no"),
+            py::arg("in_x"), py::arg("in_y"), py::arg("in_w"), py::arg("in_h"),
+            py::arg("out_x"), py::arg("out_y"), py::arg("out_w"), py::arg("out_h"),
+            py::arg("horizontal_denominator") = 100,
+            py::arg("vertical_denominator") = 100,
+            py::arg("eframing_type") = "Single",
+            py::arg("area_no") = 1,
+            py::arg("ptz_speed") = -1)
+        .def("update_eframing_area", &CameraManager::update_eframing_area,
+            py::arg("no"),
+            py::arg("area_no"),
+            py::arg("group"),
+            py::arg("dx"), py::arg("dy"), py::arg("dwidth"), py::arg("dheight"))
         .def("get_zoom_current_position", &CameraManager::get_zoom_current_position, py::arg("no"))
         .def("get_zoom_max_position", &CameraManager::get_zoom_max_position, py::arg("no"))
         .def("get_zoom_min_position", &CameraManager::get_zoom_min_position, py::arg("no"))
