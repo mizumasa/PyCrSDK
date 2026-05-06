@@ -2676,38 +2676,98 @@ void CameraDevice::set_zoom_operation()
 
 bool CameraDevice::set_zoom_speed(int zoom_speed)
 {
+    if (zoom_speed == 0) {
+        return zoom_stop();
+    }
+    return zoom_start(zoom_speed);
+}
+
+bool CameraDevice::zoom_start(int speed)
+{
+    if (speed == 0) {
+        tout << "zoom_start: speed must be non-zero.\n";
+        return false;
+    }
+
     load_properties();
-    CrInt64 ptpValue = 0;
-    // Zoom Speed Range is not supported
-    if (m_prop.zoom_speed_range.possible.size() < 2) {
-        if(zoom_speed==0) {
-            ptpValue = SDK::CrZoomOperation::CrZoomOperation_Stop;
-        }
-        if(zoom_speed>0) {
-            ptpValue = SDK::CrZoomOperation::CrZoomOperation_Tele;
-        }
-        if(zoom_speed<0) {
-            ptpValue = SDK::CrZoomOperation::CrZoomOperation_Wide;
-        }
-    }
-    else{
-        if (((zoom_speed == 0)) || (zoom_speed < (int)m_prop.zoom_speed_range.possible.at(0)) || ((int)m_prop.zoom_speed_range.possible.at(1) < zoom_speed))
-        {
-            ptpValue = SDK::CrZoomOperation::CrZoomOperation_Stop;
-        }
-        else {
-            ptpValue = (CrInt64)zoom_speed;
-        }
-    }
+
     if (SDK::CrZoomOperationEnableStatus::CrZoomOperationEnableStatus_Enable != m_prop.zoom_operation_status.current) {
         tout << "Zoom Operation is not executable.\n";
         return false;
     }
+
+    int start_value = 0;
+    if (m_prop.zoom_speed_range.possible.size() >= 2) {
+        int min_speed = static_cast<int>(m_prop.zoom_speed_range.possible.at(0));
+        int max_speed = static_cast<int>(m_prop.zoom_speed_range.possible.at(1));
+        if (speed < min_speed || speed > max_speed) {
+            tout << "zoom_start: speed is out of range.\n";
+            return false;
+        }
+        start_value = speed;
+    }
+    else {
+        start_value = (speed > 0)
+            ? static_cast<int>(SDK::CrZoomOperation::CrZoomOperation_Tele)
+            : static_cast<int>(SDK::CrZoomOperation::CrZoomOperation_Wide);
+    }
+
     SDK::CrDeviceProperty prop;
     prop.SetCode(SDK::CrDevicePropertyCode::CrDeviceProperty_Zoom_Operation);
-    prop.SetCurrentValue((CrInt64u)ptpValue);
-    prop.SetValueType(SDK::CrDataType::CrDataType_UInt16Array);
-    SDK::SetDeviceProperty(m_device_handle, &prop);
+    prop.SetCurrentValue(static_cast<CrInt64u>(static_cast<CrInt64>(start_value)));
+    prop.SetValueType(SDK::CrDataType::CrDataType_Int8);
+    auto err = SDK::SetDeviceProperty(m_device_handle, &prop);
+    if (CR_FAILED(err)) {
+        tout << "zoom_start: SetDeviceProperty failed.\n";
+        return false;
+    }
+    return true;
+}
+
+bool CameraDevice::zoom_stop()
+{
+    load_properties();
+
+    if (SDK::CrZoomOperationEnableStatus::CrZoomOperationEnableStatus_Enable != m_prop.zoom_operation_status.current) {
+        tout << "Zoom Operation is not executable.\n";
+        return false;
+    }
+
+    SDK::CrDeviceProperty prop;
+    prop.SetCode(SDK::CrDevicePropertyCode::CrDeviceProperty_Zoom_Operation);
+    prop.SetCurrentValue(static_cast<CrInt64u>(0));
+    prop.SetValueType(SDK::CrDataType::CrDataType_Int8);
+    auto err = SDK::SetDeviceProperty(m_device_handle, &prop);
+    if (CR_FAILED(err)) {
+        tout << "zoom_stop: SetDeviceProperty failed.\n";
+        return false;
+    }
+    return true;
+}
+
+bool CameraDevice::zoom_move_relative_int16(int value)
+{
+    if (value < -32768 || value > 32767) {
+        tout << "zoom_move_relative_int16: value is out of range.\n";
+        return false;
+    }
+
+    load_properties();
+
+    if (SDK::CrZoomOperationEnableStatus::CrZoomOperationEnableStatus_Enable != m_prop.zoom_operation_status.current) {
+        tout << "Zoom Operation is not executable.\n";
+        return false;
+    }
+
+    SDK::CrDeviceProperty prop;
+    prop.SetCode(SDK::CrDevicePropertyCode::CrDeviceProperty_ZoomOperationWithInt16);
+    prop.SetCurrentValue(static_cast<CrInt64u>(static_cast<CrInt64>(value)));
+    prop.SetValueType(SDK::CrDataType::CrDataType_Int16);
+    auto err = SDK::SetDeviceProperty(m_device_handle, &prop);
+    if (CR_FAILED(err)) {
+        tout << "zoom_move_relative_int16: SetDeviceProperty failed.\n";
+        return false;
+    }
     return true;
 }
 
@@ -2758,6 +2818,137 @@ void CameraDevice::set_remocon_zoom_speed_type()
     SDK::SetDeviceProperty(m_device_handle, &prop);
 }
 
+int CameraDevice::get_zoom_distance_current()
+{
+    return get_zoom_current_position();
+}
+
+int CameraDevice::get_zoom_distance_max()
+{
+    return get_zoom_max_position();
+}
+
+int CameraDevice::get_zoom_distance_min()
+{
+    return get_zoom_min_position();
+}
+
+int CameraDevice::get_zoom_distance_step()
+{
+    return get_zoom_position_step();
+}
+
+bool CameraDevice::get_zoom_speed_range(int& min_speed, int& max_speed, int& step)
+{
+    load_properties();
+
+    if (m_prop.zoom_speed_range.possible.size() < 2) {
+        min_speed = -1;
+        max_speed = 1;
+        step = 1;
+        return false;
+    }
+
+    min_speed = static_cast<int>(m_prop.zoom_speed_range.possible.at(0));
+    max_speed = static_cast<int>(m_prop.zoom_speed_range.possible.at(1));
+    step = (m_prop.zoom_speed_range.possible.size() >= 3)
+        ? static_cast<int>(m_prop.zoom_speed_range.possible.at(2))
+        : 1;
+    return true;
+}
+
+int CameraDevice::get_zoom_abs_position_current()
+{
+    load_properties();
+    if (-1 == m_prop.zoom_position_current_value.writable) {
+        tout << "Zoom Position Current Value is not supported.\n";
+        return -1;
+    }
+
+    return static_cast<int>(m_prop.zoom_position_current_value.current);
+}
+
+bool CameraDevice::get_zoom_abs_position_range(int& min_pos, int& max_pos, int& step)
+{
+    load_properties();
+    if (-1 == m_prop.zoom_position_setting.writable || m_prop.zoom_position_setting.possible.size() < 3) {
+        min_pos = -1;
+        max_pos = -1;
+        step = -1;
+        return false;
+    }
+
+    min_pos = static_cast<int>(m_prop.zoom_position_setting.possible.at(0));
+    max_pos = static_cast<int>(m_prop.zoom_position_setting.possible.at(1));
+    step = static_cast<int>(m_prop.zoom_position_setting.possible.at(2));
+    return true;
+}
+
+bool CameraDevice::set_zoom_abs_position(int position)
+{
+    load_properties();
+
+    if (1 != m_prop.zoom_position_setting.writable || m_prop.zoom_position_setting.possible.size() < 3) {
+        tout << "Zoom Position Setting is not writable.\n";
+        return false;
+    }
+
+    int min_pos = static_cast<int>(m_prop.zoom_position_setting.possible.at(0));
+    int max_pos = static_cast<int>(m_prop.zoom_position_setting.possible.at(1));
+    int step = static_cast<int>(m_prop.zoom_position_setting.possible.at(2));
+    if (position < min_pos || position > max_pos) {
+        tout << "set_zoom_abs_position: value is out of range.\n";
+        return false;
+    }
+    if (step > 0 && ((position - min_pos) % step) != 0) {
+        tout << "set_zoom_abs_position: value does not match step.\n";
+        return false;
+    }
+
+    SDK::CrDeviceProperty prop;
+    prop.SetCode(SDK::CrDevicePropertyCode::CrDeviceProperty_ZoomPositionSetting);
+    prop.SetCurrentValue(static_cast<CrInt64u>(position));
+    prop.SetValueType(SDK::CrDataType::CrDataType_UInt16);
+    auto err = SDK::SetDeviceProperty(m_device_handle, &prop);
+    if (CR_FAILED(err)) {
+        tout << "set_zoom_abs_position: SetDeviceProperty failed.\n";
+        return false;
+    }
+    return true;
+}
+
+bool CameraDevice::cancel_zoom_abs_position()
+{
+    auto err_down = SDK::SendCommand(
+        m_device_handle,
+        SDK::CrCommandId::CrCommandId_CancelZoomPosition,
+        SDK::CrCommandParam::CrCommandParam_Down);
+    if (CR_FAILED(err_down)) {
+        tout << "cancel_zoom_abs_position: Down failed.\n";
+        return false;
+    }
+
+    auto err_up = SDK::SendCommand(
+        m_device_handle,
+        SDK::CrCommandId::CrCommandId_CancelZoomPosition,
+        SDK::CrCommandParam::CrCommandParam_Up);
+    if (CR_FAILED(err_up)) {
+        tout << "cancel_zoom_abs_position: Up failed.\n";
+        return false;
+    }
+    return true;
+}
+
+int CameraDevice::get_zoom_driving_status()
+{
+    load_properties();
+    if (-1 == m_prop.zoom_driving_status.writable) {
+        tout << "Zoom Driving Status is not supported.\n";
+        return -1;
+    }
+    return static_cast<int>(m_prop.zoom_driving_status.current);
+}
+
 bool CameraDevice::set_drive_mode(CrInt64u Value)
 {
     SDK::CrDeviceProperty mode;
@@ -2778,7 +2969,8 @@ void CameraDevice::execute_camera_setting_reset()
     load_properties();
     if (SDK::CrCameraSettingsResetEnableStatus::CrCameraSettingsReset_Enable == m_prop.camera_setting_reset_enable_status.current) {
         tout << "Camera Setting Reset Enable Status: Enable \n";
-    } else {
+    }
+    else {
         tout << "Camera Setting Reset not executable.\n";
         return;
     }

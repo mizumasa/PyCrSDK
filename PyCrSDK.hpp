@@ -1,5 +1,6 @@
 #pragma once
 #include <string>
+#include <tuple>
 #include <vector>
 #include "CRSDK/CameraRemote_SDK.h"
 #include "CRSDK/CameraRemote_SDK.h"
@@ -66,6 +67,21 @@ public:
     int  get_zoom_max_speed(int no);
     int  get_zoom_min_speed(int no);
     bool set_zoom_speed(int no, int speed);
+    bool zoom_start(int no, int speed);
+    bool zoom_stop(int no);
+    bool zoom_move_relative_int16(int no, int value);
+    std::tuple<int, int, int> get_zoom_speed_range(int no);
+
+    int  get_zoom_abs_position_current(int no);
+    std::tuple<int, int, int> get_zoom_abs_position_range(int no);
+    bool set_zoom_abs_position(int no, int position);
+    bool cancel_zoom_abs_position(int no);
+    int  get_zoom_driving_status(int no);
+
+    int  get_zoom_distance_current(int no);
+    int  get_zoom_distance_min(int no);
+    int  get_zoom_distance_max(int no);
+    int  get_zoom_distance_step(int no);
     
     bool get_live_view(int no, py::buffer py_buf);
     bool download_latest_files(int no, int slot, int file_num, int mode);

@@ -124,6 +124,14 @@ public:
     int  get_zoom_position_step();
     int  get_zoom_max_speed();
     int  get_zoom_min_speed();
+    bool get_zoom_speed_range(int& min_speed, int& max_speed, int& step);
+    int  get_zoom_abs_position_current();
+    bool get_zoom_abs_position_range(int& min_pos, int& max_pos, int& step);
+    int  get_zoom_driving_status();
+    int  get_zoom_distance_current();
+    int  get_zoom_distance_min();
+    int  get_zoom_distance_max();
+    int  get_zoom_distance_step();
     void get_remocon_zoom_speed_type();
     bool get_aps_c_or_full_switching_setting();
     bool get_camera_setting_saveread_state();
@@ -179,6 +187,11 @@ public:
     void set_custom_wb();
     void set_zoom_operation();
     bool set_zoom_speed(int speed);
+    bool zoom_start(int speed);
+    bool zoom_stop();
+    bool zoom_move_relative_int16(int value);
+    bool set_zoom_abs_position(int position);
+    bool cancel_zoom_abs_position();
     void set_remocon_zoom_speed_type();
     bool set_drive_mode(CrInt64u value);
     void execute_camera_setting_reset();

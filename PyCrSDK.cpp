@@ -375,26 +375,46 @@ bool CameraManager::update_eframing_area(
 
 int CameraManager::get_zoom_current_position(int no)
 {
+    return get_zoom_distance_current(no);
+}
+
+int CameraManager::get_zoom_max_position(int no)
+{
+    return get_zoom_distance_max(no);
+}
+
+int CameraManager::get_zoom_min_position(int no)
+{
+    return get_zoom_distance_min(no);
+}
+
+int CameraManager::get_zoom_position_step(int no)
+{
+    return get_zoom_distance_step(no);
+}
+
+int CameraManager::get_zoom_distance_current(int no)
+{
     CameraDevicePtr camera = nullptr;
     if(!findTarget(no,camera,true))return -1;
     return camera->get_zoom_current_position();
 }
 
-int CameraManager::get_zoom_max_position(int no)
+int CameraManager::get_zoom_distance_max(int no)
 {
     CameraDevicePtr camera = nullptr;
     if(!findTarget(no,camera,true))return -1;
     return camera->get_zoom_max_position();
 }
 
-int CameraManager::get_zoom_min_position(int no)
+int CameraManager::get_zoom_distance_min(int no)
 {
     CameraDevicePtr camera = nullptr;
     if(!findTarget(no,camera,true))return -1;
     return camera->get_zoom_min_position();
 }
 
-int CameraManager::get_zoom_position_step(int no)
+int CameraManager::get_zoom_distance_step(int no)
 {
     CameraDevicePtr camera = nullptr;
     if(!findTarget(no,camera,true))return -1;
@@ -420,6 +440,81 @@ bool CameraManager::set_zoom_speed(int no, int speed)
     CameraDevicePtr camera = nullptr;
     if(!findTarget(no,camera,true))return false;
     return camera->set_zoom_speed(speed);
+}
+
+bool CameraManager::zoom_start(int no, int speed)
+{
+    CameraDevicePtr camera = nullptr;
+    if(!findTarget(no,camera,true))return false;
+    return camera->zoom_start(speed);
+}
+
+bool CameraManager::zoom_stop(int no)
+{
+    CameraDevicePtr camera = nullptr;
+    if(!findTarget(no,camera,true))return false;
+    return camera->zoom_stop();
+}
+
+bool CameraManager::zoom_move_relative_int16(int no, int value)
+{
+    CameraDevicePtr camera = nullptr;
+    if(!findTarget(no,camera,true))return false;
+    return camera->zoom_move_relative_int16(value);
+}
+
+std::tuple<int, int, int> CameraManager::get_zoom_speed_range(int no)
+{
+    CameraDevicePtr camera = nullptr;
+    if(!findTarget(no,camera,true))return {-1, -1, -1};
+
+    int min_speed = -1;
+    int max_speed = 1;
+    int step = 1;
+    camera->get_zoom_speed_range(min_speed, max_speed, step);
+    return {min_speed, max_speed, step};
+}
+
+int CameraManager::get_zoom_abs_position_current(int no)
+{
+    CameraDevicePtr camera = nullptr;
+    if(!findTarget(no,camera,true))return -1;
+    return camera->get_zoom_abs_position_current();
+}
+
+std::tuple<int, int, int> CameraManager::get_zoom_abs_position_range(int no)
+{
+    CameraDevicePtr camera = nullptr;
+    if(!findTarget(no,camera,true))return {-1, -1, -1};
+
+    int min_pos = -1;
+    int max_pos = -1;
+    int step = -1;
+    if (!camera->get_zoom_abs_position_range(min_pos, max_pos, step)) {
+        return {-1, -1, -1};
+    }
+    return {min_pos, max_pos, step};
+}
+
+bool CameraManager::set_zoom_abs_position(int no, int position)
+{
+    CameraDevicePtr camera = nullptr;
+    if(!findTarget(no,camera,true))return false;
+    return camera->set_zoom_abs_position(position);
+}
+
+bool CameraManager::cancel_zoom_abs_position(int no)
+{
+    CameraDevicePtr camera = nullptr;
+    if(!findTarget(no,camera,true))return false;
+    return camera->cancel_zoom_abs_position();
+}
+
+int CameraManager::get_zoom_driving_status(int no)
+{
+    CameraDevicePtr camera = nullptr;
+    if(!findTarget(no,camera,true))return -1;
+    return camera->get_zoom_driving_status();
 }
 
 bool CameraManager::get_live_view(int no, py::buffer py_buf)
