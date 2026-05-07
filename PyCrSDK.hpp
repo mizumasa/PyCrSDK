@@ -82,6 +82,31 @@ public:
     int  get_zoom_distance_min(int no);
     int  get_zoom_distance_max(int no);
     int  get_zoom_distance_step(int no);
+
+    int  get_lens_information_enable_status(int no);
+    bool request_lens_information(int no);
+    py::list get_lens_information(int no);
+    int  get_focus_distance_in_meter(int no);
+    int  get_focus_distance_in_feet(int no);
+    int  get_focal_distance_unit(int no);
+    int  get_focus_abs_position_current(int no);
+    std::tuple<int, int, int> get_focus_abs_position_range(int no);
+    bool set_focus_abs_position(int no, int position);
+    bool cancel_focus_abs_position(int no);
+    int  get_focus_driving_status(int no);
+    bool focus_start(int no, int speed);
+    bool focus_stop(int no);
+    bool focus_move_relative_int16(int no, int value);
+    std::tuple<int, int, int> get_focus_speed_range(int no);
+    int  get_focus_operation_int16_enable_status(int no);
+    int  get_follow_focus_position_current(int no);
+    std::tuple<int, int, int> get_follow_focus_position_range(int no);
+    bool set_follow_focus_position(int no, int position);
+    bool request_zoom_and_focus_presets(int no);
+    py::list get_zoom_and_focus_presets(int no);
+    bool save_zoom_and_focus_preset(int no, int preset_no);
+    bool load_zoom_and_focus_preset(int no, int preset_no);
+    bool set_zoom_and_focus_preset_zoom_only(int no, int preset_no, bool enabled);
     
     bool get_live_view(int no, py::buffer py_buf);
     bool download_latest_files(int no, int slot, int file_num, int mode);

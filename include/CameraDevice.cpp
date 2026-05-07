@@ -78,6 +78,26 @@ int getch_for_Nix(void)
 
 
 namespace SDK = SCRSDK;
+
+namespace {
+std::wstring decode_sdk_u16_string(const CrInt16u* packed)
+{
+    if (packed == nullptr || packed[0] == 0) {
+        return L"";
+    }
+
+    std::wstring result;
+    const auto length = static_cast<std::size_t>(packed[0]);
+    result.reserve(length);
+    for (std::size_t index = 1; index < length; ++index) {
+        if (packed[index] == 0) {
+            break;
+        }
+        result.push_back(static_cast<wchar_t>(packed[index]));
+    }
+    return result;
+}
+}
 using namespace std::chrono_literals;
 
 constexpr int const ImageSaveAutoStartNo = -1;
@@ -2947,6 +2967,449 @@ int CameraDevice::get_zoom_driving_status()
         return -1;
     }
     return static_cast<int>(m_prop.zoom_driving_status.current);
+}
+
+int CameraDevice::get_lens_information_enable_status()
+{
+    load_properties();
+    if (-1 == m_prop.lens_information_enable_status.writable) {
+        tout << "Lens Information Enable Status is not supported.\n";
+        return -1;
+    }
+    return static_cast<int>(m_prop.lens_information_enable_status.current);
+}
+
+bool CameraDevice::request_lens_information()
+{
+    auto err = SDK::RequestLensInformation(m_device_handle);
+    if (CR_FAILED(err)) {
+        tout << "request_lens_information: SDK request failed.\n";
+        return false;
+    }
+    return true;
+}
+
+std::vector<std::tuple<int, int, int, int>> CameraDevice::get_lens_information()
+{
+    std::vector<std::tuple<int, int, int, int>> result;
+
+    SDK::CrLensInformation* list = nullptr;
+    CrInt32u num_of_list = 0;
+    auto err = SDK::GetLensInformation(m_device_handle, &list, &num_of_list);
+    if (CR_FAILED(err) || list == nullptr || num_of_list == 0) {
+        return result;
+    }
+
+    result.reserve(num_of_list);
+    for (CrInt32u index = 0; index < num_of_list; ++index) {
+        result.emplace_back(
+            static_cast<int>(list[index].type),
+            static_cast<int>(list[index].dataVersion),
+            static_cast<int>(list[index].normalizedValue),
+            static_cast<int>(list[index].focusPosition));
+    }
+
+    SDK::ReleaseLensInformation(m_device_handle, list);
+    return result;
+}
+
+int CameraDevice::get_focus_distance_in_meter()
+{
+    load_properties();
+    if (-1 == m_prop.focus_distance_in_meter.writable) {
+        tout << "Focal Distance In Meter is not supported.\n";
+        return -1;
+    }
+    return static_cast<int>(m_prop.focus_distance_in_meter.current);
+}
+
+int CameraDevice::get_focus_distance_in_feet()
+{
+    load_properties();
+    if (-1 == m_prop.focus_distance_in_feet.writable) {
+        tout << "Focal Distance In Feet is not supported.\n";
+        return -1;
+    }
+    return static_cast<int>(m_prop.focus_distance_in_feet.current);
+}
+
+int CameraDevice::get_focal_distance_unit()
+{
+    load_properties();
+    if (-1 == m_prop.focal_distance_unit.writable) {
+        tout << "Focal Distance Unit Setting is not supported.\n";
+        return -1;
+    }
+    return static_cast<int>(m_prop.focal_distance_unit.current);
+}
+
+int CameraDevice::get_focus_abs_position_current()
+{
+    load_properties();
+    if (-1 == m_prop.focus_position_current_value.writable) {
+        tout << "Focus Position Current Value is not supported.\n";
+        return -1;
+    }
+    return static_cast<int>(m_prop.focus_position_current_value.current);
+}
+
+bool CameraDevice::get_focus_abs_position_range(int& min_pos, int& max_pos, int& step)
+{
+    load_properties();
+    if (-1 == m_prop.focus_position_setting.writable || m_prop.focus_position_setting.possible.size() < 3) {
+        min_pos = -1;
+        max_pos = -1;
+        step = -1;
+        return false;
+    }
+
+    min_pos = static_cast<int>(m_prop.focus_position_setting.possible.at(0));
+    max_pos = static_cast<int>(m_prop.focus_position_setting.possible.at(1));
+    step = static_cast<int>(m_prop.focus_position_setting.possible.at(2));
+    return true;
+}
+
+bool CameraDevice::set_focus_abs_position(int position)
+{
+    load_properties();
+
+    if (1 != m_prop.focus_position_setting.writable || m_prop.focus_position_setting.possible.size() < 3) {
+        tout << "Focus Position Setting is not writable.\n";
+        return false;
+    }
+
+    int min_pos = static_cast<int>(m_prop.focus_position_setting.possible.at(0));
+    int max_pos = static_cast<int>(m_prop.focus_position_setting.possible.at(1));
+    int step = static_cast<int>(m_prop.focus_position_setting.possible.at(2));
+    if (position < min_pos || position > max_pos) {
+        tout << "set_focus_abs_position: value is out of range.\n";
+        return false;
+    }
+    if (step > 0 && ((position - min_pos) % step) != 0) {
+        tout << "set_focus_abs_position: value does not match step.\n";
+        return false;
+    }
+
+    SDK::CrDeviceProperty prop;
+    prop.SetCode(SDK::CrDevicePropertyCode::CrDeviceProperty_FocusPositionSetting);
+    prop.SetCurrentValue(static_cast<CrInt64u>(position));
+    prop.SetValueType(SDK::CrDataType::CrDataType_UInt16);
+    auto err = SDK::SetDeviceProperty(m_device_handle, &prop);
+    if (CR_FAILED(err)) {
+        tout << "set_focus_abs_position: SetDeviceProperty failed.\n";
+        return false;
+    }
+    return true;
+}
+
+bool CameraDevice::cancel_focus_abs_position()
+{
+    auto err_down = SDK::SendCommand(
+        m_device_handle,
+        SDK::CrCommandId::CrCommandId_CancelFocusPosition,
+        SDK::CrCommandParam::CrCommandParam_Down);
+    if (CR_FAILED(err_down)) {
+        tout << "cancel_focus_abs_position: Down failed.\n";
+        return false;
+    }
+
+    auto err_up = SDK::SendCommand(
+        m_device_handle,
+        SDK::CrCommandId::CrCommandId_CancelFocusPosition,
+        SDK::CrCommandParam::CrCommandParam_Up);
+    if (CR_FAILED(err_up)) {
+        tout << "cancel_focus_abs_position: Up failed.\n";
+        return false;
+    }
+    return true;
+}
+
+int CameraDevice::get_focus_driving_status()
+{
+    load_properties();
+    if (-1 == m_prop.focus_driving_status.writable) {
+        tout << "Focus Driving Status is not supported.\n";
+        return -1;
+    }
+    return static_cast<int>(m_prop.focus_driving_status.current);
+}
+
+bool CameraDevice::focus_start(int speed)
+{
+    if (speed == 0) {
+        tout << "focus_start: speed must be non-zero.\n";
+        return false;
+    }
+
+    load_properties();
+
+    if (m_prop.focus_speed_range.possible.size() < 2) {
+        tout << "focus_start: Focus Speed Range is not supported.\n";
+        return false;
+    }
+
+    int min_speed = static_cast<int>(m_prop.focus_speed_range.possible.at(0));
+    int max_speed = static_cast<int>(m_prop.focus_speed_range.possible.at(1));
+    if (speed < min_speed || speed > max_speed) {
+        tout << "focus_start: speed is out of range.\n";
+        return false;
+    }
+
+    SDK::CrDeviceProperty prop;
+    prop.SetCode(SDK::CrDevicePropertyCode::CrDeviceProperty_Focus_Operation);
+    prop.SetCurrentValue(static_cast<CrInt64u>(static_cast<CrInt64>(speed)));
+    prop.SetValueType(SDK::CrDataType::CrDataType_Int8);
+    auto err = SDK::SetDeviceProperty(m_device_handle, &prop);
+    if (CR_FAILED(err)) {
+        tout << "focus_start: SetDeviceProperty failed.\n";
+        return false;
+    }
+    return true;
+}
+
+bool CameraDevice::focus_stop()
+{
+    SDK::CrDeviceProperty prop;
+    prop.SetCode(SDK::CrDevicePropertyCode::CrDeviceProperty_Focus_Operation);
+    prop.SetCurrentValue(static_cast<CrInt64u>(0));
+    prop.SetValueType(SDK::CrDataType::CrDataType_Int8);
+    auto err = SDK::SetDeviceProperty(m_device_handle, &prop);
+    if (CR_FAILED(err)) {
+        tout << "focus_stop: SetDeviceProperty failed.\n";
+        return false;
+    }
+    return true;
+}
+
+bool CameraDevice::focus_move_relative_int16(int value)
+{
+    if (value < -32768 || value > 32767) {
+        tout << "focus_move_relative_int16: value is out of range.\n";
+        return false;
+    }
+
+    load_properties();
+    if (SDK::CrFocusOperationWithInt16EnableStatus::CrFocusOperationWithInt16EnableStatus_Enable !=
+        m_prop.focus_operation_int16_enable_status.current) {
+        tout << "focus_move_relative_int16: operation is not enabled.\n";
+        return false;
+    }
+
+    SDK::CrDeviceProperty prop;
+    prop.SetCode(SDK::CrDevicePropertyCode::CrDeviceProperty_FocusOperationWithInt16);
+    prop.SetCurrentValue(static_cast<CrInt64u>(static_cast<CrInt64>(value)));
+    prop.SetValueType(SDK::CrDataType::CrDataType_Int16);
+    auto err = SDK::SetDeviceProperty(m_device_handle, &prop);
+    if (CR_FAILED(err)) {
+        tout << "focus_move_relative_int16: SetDeviceProperty failed.\n";
+        return false;
+    }
+    return true;
+}
+
+bool CameraDevice::get_focus_speed_range(int& min_speed, int& max_speed, int& step)
+{
+    load_properties();
+
+    if (m_prop.focus_speed_range.possible.size() < 2) {
+        min_speed = -1;
+        max_speed = -1;
+        step = -1;
+        return false;
+    }
+
+    min_speed = static_cast<int>(m_prop.focus_speed_range.possible.at(0));
+    max_speed = static_cast<int>(m_prop.focus_speed_range.possible.at(1));
+    step = (m_prop.focus_speed_range.possible.size() >= 3)
+        ? static_cast<int>(m_prop.focus_speed_range.possible.at(2))
+        : 1;
+    return true;
+}
+
+int CameraDevice::get_focus_operation_int16_enable_status()
+{
+    load_properties();
+    if (-1 == m_prop.focus_operation_int16_enable_status.writable) {
+        tout << "FocusOperationWithInt16EnableStatus is not supported.\n";
+        return -1;
+    }
+    return static_cast<int>(m_prop.focus_operation_int16_enable_status.current);
+}
+
+int CameraDevice::get_follow_focus_position_current()
+{
+    load_properties();
+    if (-1 == m_prop.follow_focus_position_current_value.writable) {
+        tout << "Follow Focus Position Current Value is not supported.\n";
+        return -1;
+    }
+    return static_cast<int>(m_prop.follow_focus_position_current_value.current);
+}
+
+bool CameraDevice::get_follow_focus_position_range(int& min_pos, int& max_pos, int& step)
+{
+    load_properties();
+    if (-1 == m_prop.follow_focus_position_setting.writable || m_prop.follow_focus_position_setting.possible.size() < 3) {
+        min_pos = -1;
+        max_pos = -1;
+        step = -1;
+        return false;
+    }
+
+    min_pos = static_cast<int>(m_prop.follow_focus_position_setting.possible.at(0));
+    max_pos = static_cast<int>(m_prop.follow_focus_position_setting.possible.at(1));
+    step = static_cast<int>(m_prop.follow_focus_position_setting.possible.at(2));
+    return true;
+}
+
+bool CameraDevice::set_follow_focus_position(int position)
+{
+    load_properties();
+
+    if (1 != m_prop.follow_focus_position_setting.writable || m_prop.follow_focus_position_setting.possible.size() < 3) {
+        tout << "Follow Focus Position Setting is not writable.\n";
+        return false;
+    }
+
+    int min_pos = static_cast<int>(m_prop.follow_focus_position_setting.possible.at(0));
+    int max_pos = static_cast<int>(m_prop.follow_focus_position_setting.possible.at(1));
+    int step = static_cast<int>(m_prop.follow_focus_position_setting.possible.at(2));
+    if (position < min_pos || position > max_pos) {
+        tout << "set_follow_focus_position: value is out of range.\n";
+        return false;
+    }
+    if (step > 0 && ((position - min_pos) % step) != 0) {
+        tout << "set_follow_focus_position: value does not match step.\n";
+        return false;
+    }
+
+    SDK::CrDeviceProperty prop;
+    prop.SetCode(SDK::CrDevicePropertyCode::CrDeviceProperty_FollowFocusPositionSetting);
+    prop.SetCurrentValue(static_cast<CrInt64u>(position));
+    prop.SetValueType(SDK::CrDataType::CrDataType_UInt16);
+    auto err = SDK::SetDeviceProperty(m_device_handle, &prop);
+    if (CR_FAILED(err)) {
+        tout << "set_follow_focus_position: SetDeviceProperty failed.\n";
+        return false;
+    }
+    return true;
+}
+
+bool CameraDevice::request_zoom_and_focus_presets()
+{
+    auto err = SDK::RequestZoomAndFocusPreset(m_device_handle);
+    if (CR_FAILED(err)) {
+        tout << "request_zoom_and_focus_presets: SDK request failed.\n";
+        return false;
+    }
+    return true;
+}
+
+std::vector<std::tuple<int, int, std::wstring, int, int, int, int>> CameraDevice::get_zoom_and_focus_presets()
+{
+    std::vector<std::tuple<int, int, std::wstring, int, int, int, int>> result;
+
+    CrInt32u preset_nums = 0;
+    SDK::CrZoomAndFocusPresetInfo* presets = nullptr;
+    auto err = SDK::GetZoomAndFocusPreset(m_device_handle, &presets, &preset_nums);
+    if (CR_FAILED(err) || presets == nullptr || preset_nums == 0) {
+        return result;
+    }
+
+    result.reserve(preset_nums);
+    for (CrInt32u index = 0; index < preset_nums; ++index) {
+        result.emplace_back(
+            static_cast<int>(index + 1),
+            static_cast<int>(presets[index].isExists),
+            decode_sdk_u16_string(reinterpret_cast<const CrInt16u*>(presets[index].lensModelName)),
+            static_cast<int>(presets[index].zoomDistance),
+            static_cast<int>(presets[index].focalDistance),
+            static_cast<int>(presets[index].zoomOnlyEnableStatus),
+            static_cast<int>(presets[index].zoomOnlyValue));
+    }
+
+    SDK::ReleaseZoomAndFocusPreset(m_device_handle, presets);
+    return result;
+}
+
+bool CameraDevice::save_zoom_and_focus_preset(int preset_no)
+{
+    load_properties();
+
+    if (preset_no <= 0 || 1 != m_prop.save_zoom_and_focus_position.writable) {
+        tout << "save_zoom_and_focus_preset: preset save is not writable.\n";
+        return false;
+    }
+    if (!m_prop.save_zoom_and_focus_position.possible.empty() &&
+        std::find(m_prop.save_zoom_and_focus_position.possible.begin(),
+                  m_prop.save_zoom_and_focus_position.possible.end(),
+                  static_cast<std::uint8_t>(preset_no)) == m_prop.save_zoom_and_focus_position.possible.end()) {
+        tout << "save_zoom_and_focus_preset: preset number is unsupported.\n";
+        return false;
+    }
+
+    SDK::CrDeviceProperty prop;
+    prop.SetCode(SDK::CrDevicePropertyCode::CrDeviceProperty_ZoomAndFocusPosition_Save);
+    prop.SetCurrentValue(static_cast<CrInt64u>(preset_no));
+    prop.SetValueType(SDK::CrDataType::CrDataType_UInt8);
+    auto err = SDK::SetDeviceProperty(m_device_handle, &prop);
+    if (CR_FAILED(err)) {
+        tout << "save_zoom_and_focus_preset: SetDeviceProperty failed.\n";
+        return false;
+    }
+    return true;
+}
+
+bool CameraDevice::load_zoom_and_focus_preset(int preset_no)
+{
+    load_properties();
+
+    if (preset_no <= 0 || 1 != m_prop.load_zoom_and_focus_position.writable) {
+        tout << "load_zoom_and_focus_preset: preset load is not writable.\n";
+        return false;
+    }
+    if (!m_prop.load_zoom_and_focus_position.possible.empty() &&
+        std::find(m_prop.load_zoom_and_focus_position.possible.begin(),
+                  m_prop.load_zoom_and_focus_position.possible.end(),
+                  static_cast<std::uint8_t>(preset_no)) == m_prop.load_zoom_and_focus_position.possible.end()) {
+        tout << "load_zoom_and_focus_preset: preset number is unsupported.\n";
+        return false;
+    }
+
+    SDK::CrDeviceProperty prop;
+    prop.SetCode(SDK::CrDevicePropertyCode::CrDeviceProperty_ZoomAndFocusPosition_Load);
+    prop.SetCurrentValue(static_cast<CrInt64u>(preset_no));
+    prop.SetValueType(SDK::CrDataType::CrDataType_UInt8);
+    auto err = SDK::SetDeviceProperty(m_device_handle, &prop);
+    if (CR_FAILED(err)) {
+        tout << "load_zoom_and_focus_preset: SetDeviceProperty failed.\n";
+        return false;
+    }
+    return true;
+}
+
+bool CameraDevice::set_zoom_and_focus_preset_zoom_only(int preset_no, bool enabled)
+{
+    if (preset_no <= 0 || preset_no > 255) {
+        tout << "set_zoom_and_focus_preset_zoom_only: preset number is out of range.\n";
+        return false;
+    }
+
+    const int zoom_only_value = enabled
+        ? static_cast<int>(SDK::CrZoomAndFocusPresetZoomOnlyValue::CrZoomAndFocusPresetZoomOnlyValue_On)
+        : static_cast<int>(SDK::CrZoomAndFocusPresetZoomOnlyValue::CrZoomAndFocusPresetZoomOnlyValue_Off);
+    const int packed = (((preset_no - 1) & 0xFF) << 8) | (zoom_only_value & 0xFF);
+
+    SDK::CrDeviceProperty prop;
+    prop.SetCode(SDK::CrDevicePropertyCode::CrDeviceProperty_ZoomAndFocusPresetZoomOnly_Set);
+    prop.SetCurrentValue(static_cast<CrInt64u>(packed));
+    prop.SetValueType(SDK::CrDataType::CrDataType_UInt16);
+    auto err = SDK::SetDeviceProperty(m_device_handle, &prop);
+    if (CR_FAILED(err)) {
+        tout << "set_zoom_and_focus_preset_zoom_only: SetDeviceProperty failed.\n";
+        return false;
+    }
+    return true;
 }
 
 bool CameraDevice::set_drive_mode(CrInt64u Value)
@@ -6035,6 +6498,78 @@ void CameraDevice::load_properties(CrInt32u num, CrInt32u* codes)
                 if (0 < nval) {
                     auto parsed_values = parse_focus_driving_status(prop.GetValues(), nval);
                     m_prop.focus_driving_status.possible.swap(parsed_values);
+                }
+                break;
+            case SDK::CrDevicePropertyCode::CrDeviceProperty_FollowFocusPositionSetting:
+                nval = prop.GetValueSize() / sizeof(std::uint16_t);
+                m_prop.follow_focus_position_setting.writable = prop.IsSetEnableCurrentValue();
+                m_prop.follow_focus_position_setting.current = static_cast<std::uint16_t>(prop.GetCurrentValue());
+                if (0 < nval) {
+                    auto parsed_values = parse_follow_focus_position(prop.GetValues(), nval);
+                    m_prop.follow_focus_position_setting.possible.swap(parsed_values);
+                }
+                break;
+            case SDK::CrDevicePropertyCode::CrDeviceProperty_FollowFocusPositionCurrentValue:
+                nval = prop.GetValueSize() / sizeof(std::uint16_t);
+                m_prop.follow_focus_position_current_value.writable = prop.IsSetEnableCurrentValue();
+                m_prop.follow_focus_position_current_value.current = static_cast<std::uint16_t>(prop.GetCurrentValue());
+                if (0 < nval) {
+                    auto parsed_values = parse_follow_focus_position(prop.GetValues(), nval);
+                    m_prop.follow_focus_position_current_value.possible.swap(parsed_values);
+                }
+                break;
+            case SDK::CrDevicePropertyCode::CrDeviceProperty_Focus_Speed_Range:
+                nval = prop.GetValueSize() / sizeof(std::int8_t);
+                m_prop.focus_speed_range.writable = prop.IsSetEnableCurrentValue();
+                m_prop.focus_speed_range.current = static_cast<std::int8_t>(prop.GetCurrentValue());
+                if (0 < nval) {
+                    auto parsed_values = parse_focus_speed_range(prop.GetValues(), nval);
+                    m_prop.focus_speed_range.possible.swap(parsed_values);
+                }
+                break;
+            case SDK::CrDevicePropertyCode::CrDeviceProperty_FocusOperationWithInt16EnableStatus:
+                nval = prop.GetValueSize() / sizeof(std::uint8_t);
+                m_prop.focus_operation_int16_enable_status.writable = prop.IsSetEnableCurrentValue();
+                m_prop.focus_operation_int16_enable_status.current = static_cast<std::uint8_t>(prop.GetCurrentValue());
+                if (0 < nval) {
+                    auto parsed_values = parse_focus_operation_int16_enable_status(prop.GetValues(), nval);
+                    m_prop.focus_operation_int16_enable_status.possible.swap(parsed_values);
+                }
+                break;
+            case SDK::CrDevicePropertyCode::CrDeviceProperty_LensInformationEnableStatus:
+                nval = prop.GetValueSize() / sizeof(std::uint8_t);
+                m_prop.lens_information_enable_status.writable = prop.IsSetEnableCurrentValue();
+                m_prop.lens_information_enable_status.current = static_cast<std::uint8_t>(prop.GetCurrentValue());
+                if (0 < nval) {
+                    auto parsed_values = parse_lens_information_enable_status(prop.GetValues(), nval);
+                    m_prop.lens_information_enable_status.possible.swap(parsed_values);
+                }
+                break;
+            case SDK::CrDevicePropertyCode::CrDeviceProperty_FocalDistanceInMeter:
+                nval = prop.GetValueSize() / sizeof(std::uint32_t);
+                m_prop.focus_distance_in_meter.writable = prop.IsSetEnableCurrentValue();
+                m_prop.focus_distance_in_meter.current = static_cast<std::uint32_t>(prop.GetCurrentValue());
+                if (0 < nval) {
+                    auto parsed_values = parse_focus_distance_in_meter(prop.GetValues(), nval);
+                    m_prop.focus_distance_in_meter.possible.swap(parsed_values);
+                }
+                break;
+            case SDK::CrDevicePropertyCode::CrDeviceProperty_FocalDistanceInFeet:
+                nval = prop.GetValueSize() / sizeof(std::uint32_t);
+                m_prop.focus_distance_in_feet.writable = prop.IsSetEnableCurrentValue();
+                m_prop.focus_distance_in_feet.current = static_cast<std::uint32_t>(prop.GetCurrentValue());
+                if (0 < nval) {
+                    auto parsed_values = parse_focus_distance_in_feet(prop.GetValues(), nval);
+                    m_prop.focus_distance_in_feet.possible.swap(parsed_values);
+                }
+                break;
+            case SDK::CrDevicePropertyCode::CrDeviceProperty_FocalDistanceUnitSetting:
+                nval = prop.GetValueSize() / sizeof(std::uint8_t);
+                m_prop.focal_distance_unit.writable = prop.IsSetEnableCurrentValue();
+                m_prop.focal_distance_unit.current = static_cast<std::uint8_t>(prop.GetCurrentValue());
+                if (0 < nval) {
+                    auto parsed_values = parse_focal_distance_unit(prop.GetValues(), nval);
+                    m_prop.focal_distance_unit.possible.swap(parsed_values);
                 }
                 break;
             case SDK::CrDevicePropertyCode::CrDeviceProperty_ZoomDistance:

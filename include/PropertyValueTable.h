@@ -93,6 +93,14 @@ struct PropertyValueTable
     PropertyValueEntry<std::uint16_t> focus_position_setting;
     PropertyValueEntry<std::uint16_t> focus_position_current_value;
     PropertyValueEntry<std::uint8_t> focus_driving_status;
+    PropertyValueEntry<std::uint16_t> follow_focus_position_setting;
+    PropertyValueEntry<std::uint16_t> follow_focus_position_current_value;
+    PropertyValueEntry<std::int8_t> focus_speed_range;
+    PropertyValueEntry<std::uint8_t> focus_operation_int16_enable_status;
+    PropertyValueEntry<std::uint8_t> lens_information_enable_status;
+    PropertyValueEntry<std::uint32_t> focus_distance_in_meter;
+    PropertyValueEntry<std::uint32_t> focus_distance_in_feet;
+    PropertyValueEntry<std::uint8_t> focal_distance_unit;
     PropertyValueEntry<std::uint32_t> zoom_distance;
     PropertyValueEntry<std::uint8_t> customwb_size_setting;
     PropertyValueEntry<std::uint8_t> time_shift_shooting;
@@ -168,6 +176,13 @@ std::vector<std::uint8_t> parse_shutter_type(unsigned char const* buf, std::uint
 std::vector<std::uint16_t> parse_movie_shooting_mode(unsigned char const* buf, std::uint32_t nval);
 std::vector<std::uint16_t> parse_focus_position(unsigned char const* buf, std::uint32_t nval);
 std::vector<std::uint8_t> parse_focus_driving_status(unsigned char const* buf, std::uint32_t nval);
+std::vector<std::uint16_t> parse_follow_focus_position(unsigned char const* buf, std::uint32_t nval);
+std::vector<std::int8_t> parse_focus_speed_range(unsigned char const* buf, std::uint32_t nval);
+std::vector<std::uint8_t> parse_focus_operation_int16_enable_status(unsigned char const* buf, std::uint32_t nval);
+std::vector<std::uint8_t> parse_lens_information_enable_status(unsigned char const* buf, std::uint32_t nval);
+std::vector<std::uint32_t> parse_focus_distance_in_meter(unsigned char const* buf, std::uint32_t nval);
+std::vector<std::uint32_t> parse_focus_distance_in_feet(unsigned char const* buf, std::uint32_t nval);
+std::vector<std::uint8_t> parse_focal_distance_unit(unsigned char const* buf, std::uint32_t nval);
 std::vector<std::uint32_t> parse_zoom_distance(unsigned char const* buf, std::uint32_t nval);
 std::vector<std::uint8_t> parse_customwb_size_setting(unsigned char const* buf, std::uint32_t nval);
 std::vector<std::uint8_t> parse_time_shift_shooting(unsigned char const* buf, std::uint32_t nval);

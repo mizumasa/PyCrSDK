@@ -768,6 +768,55 @@ std::vector<std::uint8_t> parse_focus_driving_status(unsigned char const* buf, s
     return result;
 }
 
+std::vector<std::uint16_t> parse_follow_focus_position(unsigned char const* buf, std::uint32_t nval)
+{
+    return parse_focus_position(buf, nval);
+}
+
+std::vector<std::int8_t> parse_focus_speed_range(unsigned char const* buf, std::uint32_t nval)
+{
+    return parse_zoom_speed_range(buf, nval);
+}
+
+std::vector<std::uint8_t> parse_focus_operation_int16_enable_status(unsigned char const* buf, std::uint32_t nval)
+{
+    using TargetType = std::uint8_t;
+    constexpr std::size_t const type_size = sizeof(TargetType);
+    TargetType const* source = reinterpret_cast<TargetType const*>(buf);
+    std::vector<TargetType> result(nval);
+    for (std::uint32_t i = 0; i < nval; ++i, ++source) {
+        MemCpyEx(&result[i], source, type_size);
+    }
+    return result;
+}
+
+std::vector<std::uint8_t> parse_lens_information_enable_status(unsigned char const* buf, std::uint32_t nval)
+{
+    using TargetType = std::uint8_t;
+    constexpr std::size_t const type_size = sizeof(TargetType);
+    TargetType const* source = reinterpret_cast<TargetType const*>(buf);
+    std::vector<TargetType> result(nval);
+    for (std::uint32_t i = 0; i < nval; ++i, ++source) {
+        MemCpyEx(&result[i], source, type_size);
+    }
+    return result;
+}
+
+std::vector<std::uint32_t> parse_focus_distance_in_meter(unsigned char const* buf, std::uint32_t nval)
+{
+    return parse_zoom_distance(buf, nval);
+}
+
+std::vector<std::uint32_t> parse_focus_distance_in_feet(unsigned char const* buf, std::uint32_t nval)
+{
+    return parse_zoom_distance(buf, nval);
+}
+
+std::vector<std::uint8_t> parse_focal_distance_unit(unsigned char const* buf, std::uint32_t nval)
+{
+    return parse_lens_information_enable_status(buf, nval);
+}
+
 std::vector<std::uint32_t> parse_zoom_distance(unsigned char const* buf, std::uint32_t nval)
 {
     using TargetType = std::uint32_t;

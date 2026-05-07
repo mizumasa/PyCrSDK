@@ -517,6 +517,222 @@ int CameraManager::get_zoom_driving_status(int no)
     return camera->get_zoom_driving_status();
 }
 
+int CameraManager::get_lens_information_enable_status(int no)
+{
+    CameraDevicePtr camera = nullptr;
+    if(!findTarget(no,camera,true))return -1;
+    return camera->get_lens_information_enable_status();
+}
+
+bool CameraManager::request_lens_information(int no)
+{
+    CameraDevicePtr camera = nullptr;
+    if(!findTarget(no,camera,true))return false;
+    return camera->request_lens_information();
+}
+
+py::list CameraManager::get_lens_information(int no)
+{
+    py::list result;
+
+    CameraDevicePtr camera = nullptr;
+    if(!findTarget(no,camera,true))return result;
+
+    auto lens_info = camera->get_lens_information();
+    for (const auto& entry : lens_info) {
+        py::dict item;
+        item["type"] = std::get<0>(entry);
+        item["data_version"] = std::get<1>(entry);
+        item["normalized_value"] = std::get<2>(entry);
+        item["focus_position"] = std::get<3>(entry);
+        result.append(item);
+    }
+    return result;
+}
+
+int CameraManager::get_focus_distance_in_meter(int no)
+{
+    CameraDevicePtr camera = nullptr;
+    if(!findTarget(no,camera,true))return -1;
+    return camera->get_focus_distance_in_meter();
+}
+
+int CameraManager::get_focus_distance_in_feet(int no)
+{
+    CameraDevicePtr camera = nullptr;
+    if(!findTarget(no,camera,true))return -1;
+    return camera->get_focus_distance_in_feet();
+}
+
+int CameraManager::get_focal_distance_unit(int no)
+{
+    CameraDevicePtr camera = nullptr;
+    if(!findTarget(no,camera,true))return -1;
+    return camera->get_focal_distance_unit();
+}
+
+int CameraManager::get_focus_abs_position_current(int no)
+{
+    CameraDevicePtr camera = nullptr;
+    if(!findTarget(no,camera,true))return -1;
+    return camera->get_focus_abs_position_current();
+}
+
+std::tuple<int, int, int> CameraManager::get_focus_abs_position_range(int no)
+{
+    CameraDevicePtr camera = nullptr;
+    if(!findTarget(no,camera,true))return {-1, -1, -1};
+
+    int min_pos = -1;
+    int max_pos = -1;
+    int step = -1;
+    if (!camera->get_focus_abs_position_range(min_pos, max_pos, step)) {
+        return {-1, -1, -1};
+    }
+    return {min_pos, max_pos, step};
+}
+
+bool CameraManager::set_focus_abs_position(int no, int position)
+{
+    CameraDevicePtr camera = nullptr;
+    if(!findTarget(no,camera,true))return false;
+    return camera->set_focus_abs_position(position);
+}
+
+bool CameraManager::cancel_focus_abs_position(int no)
+{
+    CameraDevicePtr camera = nullptr;
+    if(!findTarget(no,camera,true))return false;
+    return camera->cancel_focus_abs_position();
+}
+
+int CameraManager::get_focus_driving_status(int no)
+{
+    CameraDevicePtr camera = nullptr;
+    if(!findTarget(no,camera,true))return -1;
+    return camera->get_focus_driving_status();
+}
+
+bool CameraManager::focus_start(int no, int speed)
+{
+    CameraDevicePtr camera = nullptr;
+    if(!findTarget(no,camera,true))return false;
+    return camera->focus_start(speed);
+}
+
+bool CameraManager::focus_stop(int no)
+{
+    CameraDevicePtr camera = nullptr;
+    if(!findTarget(no,camera,true))return false;
+    return camera->focus_stop();
+}
+
+bool CameraManager::focus_move_relative_int16(int no, int value)
+{
+    CameraDevicePtr camera = nullptr;
+    if(!findTarget(no,camera,true))return false;
+    return camera->focus_move_relative_int16(value);
+}
+
+std::tuple<int, int, int> CameraManager::get_focus_speed_range(int no)
+{
+    CameraDevicePtr camera = nullptr;
+    if(!findTarget(no,camera,true))return {-1, -1, -1};
+
+    int min_speed = -1;
+    int max_speed = -1;
+    int step = -1;
+    if (!camera->get_focus_speed_range(min_speed, max_speed, step)) {
+        return {-1, -1, -1};
+    }
+    return {min_speed, max_speed, step};
+}
+
+int CameraManager::get_focus_operation_int16_enable_status(int no)
+{
+    CameraDevicePtr camera = nullptr;
+    if(!findTarget(no,camera,true))return -1;
+    return camera->get_focus_operation_int16_enable_status();
+}
+
+int CameraManager::get_follow_focus_position_current(int no)
+{
+    CameraDevicePtr camera = nullptr;
+    if(!findTarget(no,camera,true))return -1;
+    return camera->get_follow_focus_position_current();
+}
+
+std::tuple<int, int, int> CameraManager::get_follow_focus_position_range(int no)
+{
+    CameraDevicePtr camera = nullptr;
+    if(!findTarget(no,camera,true))return {-1, -1, -1};
+
+    int min_pos = -1;
+    int max_pos = -1;
+    int step = -1;
+    if (!camera->get_follow_focus_position_range(min_pos, max_pos, step)) {
+        return {-1, -1, -1};
+    }
+    return {min_pos, max_pos, step};
+}
+
+bool CameraManager::set_follow_focus_position(int no, int position)
+{
+    CameraDevicePtr camera = nullptr;
+    if(!findTarget(no,camera,true))return false;
+    return camera->set_follow_focus_position(position);
+}
+
+bool CameraManager::request_zoom_and_focus_presets(int no)
+{
+    CameraDevicePtr camera = nullptr;
+    if(!findTarget(no,camera,true))return false;
+    return camera->request_zoom_and_focus_presets();
+}
+
+py::list CameraManager::get_zoom_and_focus_presets(int no)
+{
+    py::list result;
+
+    CameraDevicePtr camera = nullptr;
+    if(!findTarget(no,camera,true))return result;
+
+    auto presets = camera->get_zoom_and_focus_presets();
+    for (const auto& entry : presets) {
+        py::dict item;
+        item["preset_no"] = std::get<0>(entry);
+        item["is_exists"] = std::get<1>(entry);
+        item["lens_model_name"] = std::get<2>(entry);
+        item["zoom_distance"] = std::get<3>(entry);
+        item["focal_distance"] = std::get<4>(entry);
+        item["zoom_only_enable_status"] = std::get<5>(entry);
+        item["zoom_only_value"] = std::get<6>(entry);
+        result.append(item);
+    }
+    return result;
+}
+
+bool CameraManager::save_zoom_and_focus_preset(int no, int preset_no)
+{
+    CameraDevicePtr camera = nullptr;
+    if(!findTarget(no,camera,true))return false;
+    return camera->save_zoom_and_focus_preset(preset_no);
+}
+
+bool CameraManager::load_zoom_and_focus_preset(int no, int preset_no)
+{
+    CameraDevicePtr camera = nullptr;
+    if(!findTarget(no,camera,true))return false;
+    return camera->load_zoom_and_focus_preset(preset_no);
+}
+
+bool CameraManager::set_zoom_and_focus_preset_zoom_only(int no, int preset_no, bool enabled)
+{
+    CameraDevicePtr camera = nullptr;
+    if(!findTarget(no,camera,true))return false;
+    return camera->set_zoom_and_focus_preset_zoom_only(preset_no, enabled);
+}
+
 bool CameraManager::get_live_view(int no, py::buffer py_buf)
 {
     CameraDevicePtr camera = nullptr;
