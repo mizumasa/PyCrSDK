@@ -111,7 +111,8 @@ public:
     py::dict get_device_property(int no, std::uint32_t prop_code);
     py::dict set_device_property(int no, std::uint32_t prop_code, std::int64_t value, int value_type = -1);
     
-    bool get_live_view(int no, py::buffer py_buf);
+    bool get_live_view(int no, int selected_index, py::buffer py_buf);
+    bool get_osd(int no, py::buffer py_buf);
     bool download_latest_files(int no, int slot, int file_num, int mode);
     std::string get_connected_model() const;
     // --------------------------------

@@ -891,12 +891,19 @@ py::dict CameraManager::set_device_property(int no, std::uint32_t prop_code, std
     return result;
 }
 
-bool CameraManager::get_live_view(int no, py::buffer py_buf)
+bool CameraManager::get_live_view(int no, int selected_index, py::buffer py_buf)
 {
     CameraDevicePtr camera = nullptr;
     if(!findTarget(no,camera,true))return false;
-    camera->get_live_view(0, py_buf); // 0 for LiveViewOnly
+    camera->get_live_view(selected_index, py_buf);
     return true;
+}
+
+bool CameraManager::get_osd(int no, py::buffer py_buf)
+{
+    CameraDevicePtr camera = nullptr;
+    if (!findTarget(no, camera, true)) return false;
+    return camera->get_osd(py_buf);
 }
 
 bool CameraManager::download_latest_files(int no, int slot, int file_num, int mode)

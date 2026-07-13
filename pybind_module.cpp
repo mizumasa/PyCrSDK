@@ -91,7 +91,8 @@ PYBIND11_MODULE(pycrsdk, m) {
           .def("get_device_property", &CameraManager::get_device_property, py::arg("no"), py::arg("prop_code"))
           .def("set_device_property", &CameraManager::set_device_property,
               py::arg("no"), py::arg("prop_code"), py::arg("value"), py::arg("value_type") = -1)
-        .def("get_live_view", &CameraManager::get_live_view, py::arg("no"), py::arg("py_buf"))
+        .def("get_live_view", &CameraManager::get_live_view, py::arg("no"), py::arg("selected_index"), py::arg("py_buf"))
+        .def("get_osd", &CameraManager::get_osd, py::arg("no"), py::arg("py_buf"))
         .def("download_latest_files", &CameraManager::download_latest_files,
               py::arg("no"), py::arg("slot"), py::arg("file_num"), py::arg("mode"))
         .def("get_connected_model", &CameraManager::get_connected_model)
