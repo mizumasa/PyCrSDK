@@ -166,8 +166,6 @@ public:
     bool get_shutter_speed_value();
     bool get_white_balance_tint();
     void get_media_slot_status();
-    bool get_device_property(CrInt32u code, SCRSDK::CrDeviceProperty& prop) const;
-    bool set_device_property(CrInt32u code, CrInt64 value, SCRSDK::CrDataType value_type, SCRSDK::CrError* out_error = nullptr) const;
     bool get_movie_rec_button_toggle_enable_status();
     bool get_focus_bracket_shot_num();
     bool get_focus_bracket_focus_range();
@@ -381,8 +379,8 @@ public:
 
 private:
     void load_properties(CrInt32u num = 0, CrInt32u* codes = nullptr);
-    bool get_property(SCRSDK::CrDeviceProperty& prop) const;
-    bool set_property(SCRSDK::CrDeviceProperty& prop, SCRSDK::CrError* out_error = nullptr) const;
+    void get_property(SCRSDK::CrDeviceProperty& prop) const;
+    bool set_property(SCRSDK::CrDeviceProperty& prop) const;
     text format_dispstrlist(SCRSDK::CrDisplayStringListInfo list);
     text format_display_string_type(SCRSDK::CrDisplayStringType type);
     void check_monitoringstatus();

@@ -6767,48 +6767,17 @@ void CameraDevice::load_properties(CrInt32u num, CrInt32u* codes)
     }
 }
 
-bool CameraDevice::get_property(SDK::CrDeviceProperty& prop) const
+void CameraDevice::get_property(SDK::CrDeviceProperty& prop) const
 {
-    std::int32_t nprops = 0;
     SDK::CrDeviceProperty* properties = nullptr;
-    CrInt32u code = prop.GetCode();
-    SDK::CrError res = SDK::GetSelectDeviceProperties(m_device_handle, 1, &code, &properties, &nprops);
-    if (CR_FAILED(res) || !properties || nprops <= 0) {
-        return false;
-    }
-
-    bool ok = false;
-    if (properties[0].GetCode() == code) {
-        prop = properties[0];
-        ok = true;
-    }
-
-    SDK::ReleaseDeviceProperties(m_device_handle, properties);
-    return ok;
+    int nprops = 0;
+    SDK::GetDeviceProperties(m_device_handle, &properties, &nprops);
 }
 
-bool CameraDevice::set_property(SDK::CrDeviceProperty& prop, SDK::CrError* out_error) const
+bool CameraDevice::set_property(SDK::CrDeviceProperty& prop) const
 {
-    SDK::CrError res = SDK::SetDeviceProperty(m_device_handle, &prop);
-    if (out_error) {
-        *out_error = res;
-    }
-    return CR_SUCCEEDED(res);
-}
-
-bool CameraDevice::get_device_property(CrInt32u code, SDK::CrDeviceProperty& prop) const
-{
-    prop.SetCode(code);
-    return get_property(prop);
-}
-
-bool CameraDevice::set_device_property(CrInt32u code, CrInt64 value, SDK::CrDataType value_type, SDK::CrError* out_error) const
-{
-    SDK::CrDeviceProperty prop;
-    prop.SetCode(code);
-    prop.SetCurrentValue(static_cast<CrInt64u>(value));
-    prop.SetValueType(value_type);
-    return set_property(prop, out_error);
+    SDK::SetDeviceProperty(m_device_handle, &prop);
+    return false;
 }
 
 void CameraDevice::getContentsList()
