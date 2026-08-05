@@ -1,5 +1,6 @@
 #include "PyCrSDK.hpp"
 #include <iostream>
+#include <cstring>
 
 namespace SDK = SCRSDK;
 
@@ -25,6 +26,78 @@ SDK::CrEframingType parse_eframing_type(const std::string& type_name)
         return SDK::CrEframingType_ForceZoomOut;
     }
     return SDK::CrEframingType_Single;
+}
+
+std::size_t data_type_unit_size(SDK::CrDataType value_type)
+{
+    const auto type = static_cast<CrInt32u>(value_type);
+    const auto base = type & 0x1FFFu;
+
+    switch (base) {
+    case SDK::CrDataType_UInt8:
+    case SDK::CrDataType_Int8:
+        return sizeof(std::uint8_t);
+    case SDK::CrDataType_UInt16:
+    case SDK::CrDataType_Int16:
+        return sizeof(std::uint16_t);
+    case SDK::CrDataType_UInt32:
+    case SDK::CrDataType_Int32:
+        return sizeof(std::uint32_t);
+    case SDK::CrDataType_UInt64:
+    case SDK::CrDataType_Int64:
+        return sizeof(std::uint64_t);
+    default:
+        return 0;
+    }
+}
+
+template <typename T>
+py::list decode_value_list(const CrInt8u* raw, std::size_t count)
+{
+    py::list values;
+    if (!raw || count == 0) {
+        return values;
+    }
+
+    for (std::size_t i = 0; i < count; ++i) {
+        T v{};
+        std::memcpy(&v, raw + (i * sizeof(T)), sizeof(T));
+        values.append(v);
+    }
+    return values;
+}
+
+py::list decode_possible_values(SDK::CrDataType value_type, const CrInt8u* raw, std::size_t size)
+{
+    const std::size_t unit = data_type_unit_size(value_type);
+    if (unit == 0 || size == 0 || !raw || (size % unit) != 0) {
+        return py::list();
+    }
+
+    const std::size_t count = size / unit;
+    const auto type = static_cast<CrInt32u>(value_type);
+    const auto base = type & 0x1FFFu;
+
+    switch (base) {
+    case SDK::CrDataType_UInt8:
+        return decode_value_list<std::uint8_t>(raw, count);
+    case SDK::CrDataType_Int8:
+        return decode_value_list<std::int8_t>(raw, count);
+    case SDK::CrDataType_UInt16:
+        return decode_value_list<std::uint16_t>(raw, count);
+    case SDK::CrDataType_Int16:
+        return decode_value_list<std::int16_t>(raw, count);
+    case SDK::CrDataType_UInt32:
+        return decode_value_list<std::uint32_t>(raw, count);
+    case SDK::CrDataType_Int32:
+        return decode_value_list<std::int32_t>(raw, count);
+    case SDK::CrDataType_UInt64:
+        return decode_value_list<std::uint64_t>(raw, count);
+    case SDK::CrDataType_Int64:
+        return decode_value_list<std::int64_t>(raw, count);
+    default:
+        return py::list();
+    }
 }
 } // namespace
 
@@ -733,12 +806,104 @@ bool CameraManager::set_zoom_and_focus_preset_zoom_only(int no, int preset_no, b
     return camera->set_zoom_and_focus_preset_zoom_only(preset_no, enabled);
 }
 
-bool CameraManager::get_live_view(int no, py::buffer py_buf)
+py::dict CameraManager::get_device_property(int no, std::uint32_t prop_code)
+{
+    py::dict result;
+    result["ok"] = false;
+    result["code"] = prop_code;
+
+    CameraDevicePtr camera = nullptr;
+    if (!findTarget(no, camera, true)) {
+        result["error"] = "camera_not_found_or_not_connected";
+        return result;
+    }
+
+    SDK::CrDeviceProperty prop;
+    if (!camera->get_device_property(static_cast<CrInt32u>(prop_code), prop)) {
+        result["error"] = "get_property_failed";
+        return result;
+    }
+
+    const auto value_type = prop.GetValueType();
+    const auto value_size = static_cast<std::size_t>(prop.GetValueSize());
+    const auto* values = prop.GetValues();
+
+    result["ok"] = true;
+    result["code"] = static_cast<std::uint32_t>(prop.GetCode());
+    result["value_type"] = static_cast<std::uint32_t>(value_type);
+    result["current_value"] = static_cast<std::int64_t>(prop.GetCurrentValue());
+    result["can_get"] = prop.IsGetEnableCurrentValue() != 0;
+    result["can_set"] = prop.IsSetEnableCurrentValue() != 0;
+    result["value_size"] = static_cast<std::uint32_t>(value_size);
+    result["possible_values"] = decode_possible_values(value_type, values, value_size);
+    result["values_raw"] = py::bytes(reinterpret_cast<const char*>(values), value_size);
+    return result;
+}
+
+py::dict CameraManager::set_device_property(int no, std::uint32_t prop_code, std::int64_t value, int value_type)
+{
+    py::dict result;
+    result["ok"] = false;
+    result["code"] = prop_code;
+    result["value"] = value;
+
+    CameraDevicePtr camera = nullptr;
+    if (!findTarget(no, camera, true)) {
+        result["error"] = "camera_not_found_or_not_connected";
+        return result;
+    }
+
+    SDK::CrDataType final_type = SDK::CrDataType_Undefined;
+    if (value_type >= 0) {
+        final_type = static_cast<SDK::CrDataType>(value_type);
+    } else {
+        SDK::CrDeviceProperty prop;
+        if (!camera->get_device_property(static_cast<CrInt32u>(prop_code), prop)) {
+            result["error"] = "get_property_failed";
+            return result;
+        }
+        if (!prop.IsSetEnableCurrentValue()) {
+            result["error"] = "property_not_writable";
+            return result;
+        }
+        final_type = prop.GetValueType();
+    }
+
+    if (final_type == SDK::CrDataType_Undefined || final_type == SDK::CrDataType_STR) {
+        result["error"] = "unsupported_value_type";
+        result["value_type"] = static_cast<std::uint32_t>(final_type);
+        return result;
+    }
+
+    SDK::CrError err = SDK::CrError_Generic;
+    const bool ok = camera->set_device_property(
+        static_cast<CrInt32u>(prop_code),
+        static_cast<CrInt64>(value),
+        final_type,
+        &err);
+
+    result["ok"] = ok;
+    result["value_type"] = static_cast<std::uint32_t>(final_type);
+    result["error_code"] = static_cast<std::uint32_t>(err);
+    if (!ok) {
+        result["error"] = "set_property_failed";
+    }
+    return result;
+}
+
+bool CameraManager::get_live_view(int no, int selected_index, py::buffer py_buf)
 {
     CameraDevicePtr camera = nullptr;
     if(!findTarget(no,camera,true))return false;
-    camera->get_live_view(0, py_buf); // 0 for LiveViewOnly
+    camera->get_live_view(selected_index, py_buf);
     return true;
+}
+
+bool CameraManager::get_osd(int no, py::buffer py_buf)
+{
+    CameraDevicePtr camera = nullptr;
+    if (!findTarget(no, camera, true)) return false;
+    return camera->get_osd(py_buf);
 }
 
 bool CameraManager::download_latest_files(int no, int slot, int file_num, int mode)
