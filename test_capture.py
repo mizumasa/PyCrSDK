@@ -46,7 +46,7 @@ else:
         # C++関数を呼び出し、データを直接書き込む
         while 1:
             try:
-                cam.get_live_view(0, 0, buf)  # 0: camera_index, 0: LiveViewOnly
+                cam.get_live_view(0, buf)
                 
                 arr = np.frombuffer(buf, dtype=np.uint8)
                 img = cv2.imdecode(arr, cv2.IMREAD_COLOR)  # BGR画像としてデコード

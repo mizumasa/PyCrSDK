@@ -88,11 +88,7 @@ PYBIND11_MODULE(pycrsdk, m) {
           .def("save_zoom_and_focus_preset", &CameraManager::save_zoom_and_focus_preset, py::arg("no"), py::arg("preset_no"))
           .def("load_zoom_and_focus_preset", &CameraManager::load_zoom_and_focus_preset, py::arg("no"), py::arg("preset_no"))
           .def("set_zoom_and_focus_preset_zoom_only", &CameraManager::set_zoom_and_focus_preset_zoom_only, py::arg("no"), py::arg("preset_no"), py::arg("enabled"))
-          .def("get_device_property", &CameraManager::get_device_property, py::arg("no"), py::arg("prop_code"))
-          .def("set_device_property", &CameraManager::set_device_property,
-              py::arg("no"), py::arg("prop_code"), py::arg("value"), py::arg("value_type") = -1)
-        .def("get_live_view", &CameraManager::get_live_view, py::arg("no"), py::arg("selected_index"), py::arg("py_buf"))
-        .def("get_osd", &CameraManager::get_osd, py::arg("no"), py::arg("py_buf"))
+        .def("get_live_view", &CameraManager::get_live_view, py::arg("no"), py::arg("py_buf"))
         .def("download_latest_files", &CameraManager::download_latest_files,
               py::arg("no"), py::arg("slot"), py::arg("file_num"), py::arg("mode"))
         .def("get_connected_model", &CameraManager::get_connected_model)
