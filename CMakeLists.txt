@@ -1,11 +1,14 @@
 cmake_minimum_required(VERSION 3.15)
 project(PyCrSDK)
 
-add_subdirectory(external/pybind11)
-
-# 必要であれば明示的に設定 (例: C++17)
 set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
+
+set(PYBIND11_FINDPYTHON ON)
+find_package(pybind11 CONFIG QUIET)
+if(NOT pybind11_FOUND)
+    add_subdirectory(external/pybind11)
+endif()
 
 # SDKのヘッダ・ライブラリをインクルード
 include_directories(
@@ -62,4 +65,10 @@ add_custom_command(TARGET pycrsdk POST_BUILD
         "${CMAKE_CURRENT_SOURCE_DIR}/lib/opencv/Windows/x86_64/Release/bin/opencv_imgcodecs480.dll"
         "${CMAKE_CURRENT_SOURCE_DIR}/lib/opencv/Windows/x86_64/Release/bin/opencv_imgproc480.dll"
         $<TARGET_FILE_DIR:pycrsdk>
+)
+
+install(
+    TARGETS pycrsdk
+    LIBRARY DESTINATION PyCrSDK
+    RUNTIME DESTINATION PyCrSDK
 )
