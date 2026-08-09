@@ -30,6 +30,9 @@ jobs:
         uses: pypa/cibuildwheel@v4.2.0
         with:
           output-dir: wheelhouse
+        env:
+          CIBW_REPAIR_WHEEL_COMMAND_WINDOWS: >-
+            delvewheel repair -w {dest_dir} {wheel} --add-path "${{ github.workspace }}\installer\PyCrSDK"
 
       - name: Upload wheel artifacts
         uses: actions/upload-artifact@v4
