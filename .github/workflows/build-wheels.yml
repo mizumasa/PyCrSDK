@@ -46,3 +46,33 @@ jobs:
         with:
           files: wheelhouse/*.whl
           generate_release_notes: true
+
+  # -------------------------------------------------
+  # PyPI に公開
+  # -------------------------------------------------
+  publish-to-pypi:
+
+    name: Publish to PyPI
+
+    needs:
+      - build-wheels
+
+    runs-on: ubuntu-latest
+
+    environment:
+      name: pypi
+      url: https://pypi.org/p/PyCrSDK
+
+    permissions:
+      id-token: write
+
+    steps:
+
+      - name: Download wheels
+        uses: actions/download-artifact@v6
+        with:
+          name: python-package-distributions
+          path: dist/
+
+      - name: Publish to PyPI
+        uses: pypa/gh-action-pypi-publish@release/v1
