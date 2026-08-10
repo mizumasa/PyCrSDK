@@ -37,7 +37,7 @@ jobs:
       - name: Upload wheel artifacts
         uses: actions/upload-artifact@v4
         with:
-          name: PyCrSDK-windows-wheels
+          name: python-package-distributions
           path: wheelhouse/*.whl
 
       - name: Publish release assets
