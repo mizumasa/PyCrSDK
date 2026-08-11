@@ -31,6 +31,7 @@ jobs:
         with:
           output-dir: wheelhouse
         env:
+          CIBW_ENVIRONMENT_WINDOWS: PYCRSDK_ACCEPT_TOS=y
           CIBW_REPAIR_WHEEL_COMMAND_WINDOWS: >-
             delvewheel repair -w {dest_dir} {wheel} --add-path "${{ github.workspace }}\installer\PyCrSDK"
 
