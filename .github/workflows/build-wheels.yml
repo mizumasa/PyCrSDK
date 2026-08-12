@@ -1,0 +1,79 @@
+name: Build Python wheels
+
+on:
+  workflow_dispatch:
+
+  push:
+    branches:
+      - main
+    tags:
+      - "v*"
+
+  pull_request:
+
+permissions:
+  contents: write
+
+jobs:
+  build-wheels:
+    name: Build Windows wheels
+    runs-on: windows-2022
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v6
+        with:
+          persist-credentials: false
+          submodules: false
+
+      - name: Build wheels
+        uses: pypa/cibuildwheel@v4.2.0
+        with:
+          output-dir: wheelhouse
+        env:
+          CIBW_ENVIRONMENT_WINDOWS: PYCRSDK_ACCEPT_TOS=y
+          CIBW_REPAIR_WHEEL_COMMAND_WINDOWS: >-
+            delvewheel repair -w {dest_dir} {wheel} --add-path "${{ github.workspace }}\installer\PyCrSDK"
+
+      - name: Upload wheel artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: python-package-distributions
+          path: wheelhouse/*.whl
+
+      - name: Publish release assets
+        if: startsWith(github.ref, 'refs/tags/v')
+        uses: softprops/action-gh-release@v2
+        with:
+          files: wheelhouse/*.whl
+          generate_release_notes: true
+
+  # -------------------------------------------------
+  # PyPI に公開
+  # -------------------------------------------------
+  publish-to-pypi:
+
+    name: Publish to PyPI
+
+    needs:
+      - build-wheels
+
+    runs-on: ubuntu-latest
+
+    environment:
+      name: pypi
+      url: https://pypi.org/p/PyCrSDK
+
+    permissions:
+      id-token: write
+
+    steps:
+
+      - name: Download wheels
+        uses: actions/download-artifact@v6
+        with:
+          name: python-package-distributions
+          path: dist/
+
+      - name: Publish to PyPI
+        uses: pypa/gh-action-pypi-publish@release/v1
